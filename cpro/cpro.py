@@ -1,12 +1,13 @@
 import Context
-import File
+import Operations
 import logging
+import os
 
 
 def main() -> None:
-    ctx = Context.Context('.')
-    ctx.git(['--version'])
-    file = File.File('./cpro/cpro.py', ctx)
+    ctx = Context.Context('tests/header-guard')
+    filename = os.path.join(ctx.path, 'src/FileIterator.hpp')
+    oper = Operations.HeaderComment(ctx, filename, filename)
 
 
 if __name__ == "__main__":

@@ -26,8 +26,7 @@ class File:
         try:
             self.absolute_path: str = os.path.abspath(filename)
             self.relative_path: str = self.absolute_path.replace(
-                context.path, '')
-            print(self.relative_path)
+                context.path, '')[1:]
             os.stat(self.absolute_path)
         except:
             raise  # TODO
@@ -42,12 +41,22 @@ class File:
         except:
             raise  # TODO
 
+    def read_lines(self) -> List[str]:
+        with open(self.absolute_path, 'r', newline='') as f:
+            data = f.readlines()
+        return data
+
+    def write_lines(self, lines: List[str]) ->None:
+        with open(self.absolute_path, 'w', newline='') as f:
+            for line in lines:
+                f.write(line)
+
     def _read_authors(self, blame_str: str)->List[Author]:
         lines = blame_str.split('\\n')
         all_authors = []
         line_number = 0
         for line in lines:
-            if ('author ' in line)and (not 'author Not Committed Yet' in line):
+            if (line.startswith('author '))and (not 'author Not Committed Yet' in line):
                 author = Author()
                 author.name = lines[line_number].replace('author', '').strip()
                 author.email = lines[line_number +
