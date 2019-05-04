@@ -4,6 +4,7 @@ import logging
 
 def main() -> None:
     ctx = Context.Context.Context('.')
+    ctx.git(['--version'])
 
 
 if __name__ == "__main__":
