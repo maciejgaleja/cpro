@@ -75,30 +75,29 @@ class HeaderComment(CommentOperation):
 
         first_just = 15
 
-        predicates = (TextMatchers.PredicateBeginsWith('/******************************************************************************/'),
-                      TextMatchers.PredicateBeginsWith('/* @filename'),
-                      TextMatchers.PredicateBeginsWith('/* @author'),
-                      TextMatchers.PredicateBeginsWith('/* @date'),
-                      TextMatchers.PredicateBeginsWith('/* @comment'),
-                      TextMatchers.PredicateBeginsWith('/******************************************************************************/'))
-        match_result = TextMatchers.match_group(
-            self.lines, predicates)
+        match_result = TextMatchers.match_comments(self.lines)
+        for result in match_result:
+            print(repr(result.lines))
 
-        if(match_result.is_valid()):
-            pass
-        else:
-            self.lines.insert(
-                0, self._create_comment('', solid=True))
-            self.lines.insert(
-                1, self._crate_doxy_comment('@filename', self.file.relative_path))
-            self.lines.insert(
-                2, self.create_authors_line())
-            self.lines.insert(
-                3, self._crate_doxy_comment('@date', self.file.date.isoformat()))
-            self.lines.insert(
-                4, self._crate_doxy_comment('@comment', ''))
-            self.lines.insert(
-                5, self._create_comment('', solid=True))
+        if (len(match_result) > 0):
+            possible_header = ''.join(
+                self.lines[match_result[0].lines[0]:match_result[0].lines[-1]])
+            print(possible_header)
+            if(self._verify_header(possible_header)):
+                self._delete_lines(match_result[0].lines)
+
+        self.lines.insert(
+            0, self._create_comment('', solid=True))
+        self.lines.insert(
+            1, self._crate_doxy_comment('@filename', self.file.relative_path))
+        self.lines.insert(
+            2, self.create_authors_line())
+        self.lines.insert(
+            3, self._crate_doxy_comment('@date', self.file.date.isoformat()))
+        self.lines.insert(
+            4, self._crate_doxy_comment('@comment', ''))
+        self.lines.insert(
+            5, self._create_comment('', solid=True))
 
         self.file.write_lines(self.lines)
 
@@ -107,4 +106,11 @@ class HeaderComment(CommentOperation):
         first_just = 15
         for author in self.file.authors:
             ret = ret + self._crate_doxy_comment('@author', repr(author))
+        return ret
+
+    def _verify_header(self, header: str)->bool:
+        ret = True
+        ret = ret and ('@filename' in header)
+        ret = ret and ('@date' in header)
+        ret = ret and ('@comment' in header)
         return ret
