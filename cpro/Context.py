@@ -13,11 +13,14 @@ class Context:
             self.path: str = os.path.abspath(pathStr)
             log.debug('Starting cpro in \'' + self.path + '\'')
         except:
-            raise
+            raise  # TODO
 
-    def git(self, command: List[str]) -> subprocess.CompletedProcess:
-        command_to_call = [self.git_cmd, '-C', self.path]
+    def git(self, command: List[str]) -> str:
+        command_to_call = [self.git_cmd, '--no-pager', '-C', self.path]
         command_to_call.extend(command)
         log.debug('Calling \'' + ' '.join(command_to_call))
-        return subprocess.run(command_to_call)
-        # return
+        ret = subprocess.run(command_to_call, capture_output=True)
+        if not (ret.returncode == 0):
+            log.error('Git command returned non-zero return status.\n' + str(ret))
+            raise Exception()
+        return str(ret.stdout)
