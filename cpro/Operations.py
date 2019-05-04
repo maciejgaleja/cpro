@@ -71,6 +71,30 @@ class CommentOperation(FileOperation):
             text = key.ljust(self.doxy_just_width) + value
         return self._create_comment(text, continued)
 
+    def _ensure_empty_line_before(self, line: int) -> None:
+        empty_lines = TextMatchers.match_empty_lines(self.lines)
+        empty_line_present = False
+        for mr in empty_lines:
+            if not empty_line_present:
+                for i in mr.lines:
+                    if i == line - 1:
+                        empty_line_present = True
+                        break
+        if not empty_line_present:
+            self.lines.insert(line, self.line_ending)
+
+    def _ensure_empty_line_after(self, line: int) -> None:
+        empty_lines = TextMatchers.match_empty_lines(self.lines)
+        empty_line_present = False
+        for mr in empty_lines:
+            if not empty_line_present:
+                for i in mr.lines:
+                    if i == line + 1:
+                        empty_line_present = True
+                        break
+        if not empty_line_present:
+            self.lines.insert(line + 1, self.line_ending)
+
 
 class HeaderComment(CommentOperation):
     def __init__(self, context: Context.Context, filename: str) -> None:
@@ -97,6 +121,8 @@ class HeaderComment(CommentOperation):
             4, self._crate_doxy_comment('@comment', ''))
         self.lines.insert(
             5, self._create_comment('', solid=True))
+
+        self._ensure_empty_line_after(5)
 
         self.file.write_lines(self.lines)
 
@@ -125,26 +151,36 @@ class PreIncludes(CommentOperation):
         for mr in includes:
             log.debug('Found includes in: ' + repr(mr.lines))
 
-        expected_include_comment_line = includes[0].lines[0] - 1
-        log.debug('Expecting to find include comment in line ' +
-                  str(expected_include_comment_line))
+        try:
+            expected_include_comment_line = includes[0].lines[0] - 1
+            log.debug('Expecting to find include comment in line ' +
+                      str(expected_include_comment_line))
 
-        expected_include_comment = self._create_comment('Includes', solid=True)
-        log.debug('Include comment would be like: ' + expected_include_comment)
+            expected_include_comment = self._create_comment(
+                'Includes', solid=True)
+            log.debug('Include comment would be like: ' +
+                      expected_include_comment)
 
-        comments = TextMatchers.match_comments(self.lines)
-        deleted_line = False
-        for mr in comments:
-            if not deleted_line:
-                for i in mr.lines:
-                    if i == expected_include_comment_line:
-                        self._delete_lines([i])
-                        deleted_line = False
-                        break
+            comments = TextMatchers.match_comments(self.lines)
+            deleted_line = False
+            for mr in comments:
+                if not deleted_line:
+                    for i in mr.lines:
+                        if i == expected_include_comment_line:
+                            self._delete_lines([i])
+                            deleted_line = True
+                            break
 
-        includes = TextMatchers.match_group(self.lines, predicate)
+            includes = TextMatchers.match_group(self.lines, predicate)
+            comment_position = includes[0].lines[0]
+            self.lines.insert(
+                comment_position, expected_include_comment)
 
-        self.lines.insert(
-            includes[0].lines[0], expected_include_comment)
+            self._ensure_empty_line_before(comment_position)
+
+        except:
+            log.warn('File ' + self.file.relative_path +
+                     ' does not have include section')
+            # TODO: what if there are no includes in this file?
 
         self.file.write_lines(self.lines)

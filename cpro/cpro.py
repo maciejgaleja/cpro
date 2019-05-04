@@ -2,18 +2,67 @@ import Context
 import Operations
 import logging
 import os
+from typing import List
+
+
+def format_extensions(extensions: List[str]) -> List[str]:
+    full_extensions = []
+    for extension in extensions:
+        full_extensions.append(extension.upper())
+        full_extensions.append(extension.lower())
+    return full_extensions
+
+
+def filter_by_extension(input: List[str], extensions: List[str]) -> List[str]:
+    output = []
+    for file in input:
+        if file.endswith(tuple(extensions)):
+            output.append(os.path.realpath(file))
+    return output
+
+
+def get_file_list(start_dir: str, extensions: List[str], recursive: bool = False) -> List[str]:
+    full_dir = os.path.realpath(start_dir)
+    full_extensions = format_extensions(extensions)
+    logging.debug("Getting file list:")
+    logging.debug("\troot directory: {0}".format(full_dir))
+    logging.debug("\tsearching extensions: {0}".format(
+        " ".join(full_extensions)))
+    logging.debug("\trecursive: {0}".format(recursive))
+
+    all_candidates = []
+
+    if recursive:
+        for root, dirs, files in os.walk(full_dir):
+            for name in files:
+                all_candidates.append(os.path.join(root, name))
+            for name in dirs:
+                all_candidates.append(os.path.join(root, name))
+    else:
+        candinates = os.listdir(full_dir)
+        for candidate in candinates:
+            all_candidates.append(os.path.join(full_dir, candidate))
+
+    files = filter_by_extension(all_candidates, full_extensions)
+    logging.debug("\tFound files:\n\t\t{0}".format("\n\t\t".join(files)))
+    return files
 
 
 def main() -> None:
-    ctx = Context.Context('tests/header-guard')
-    filename = os.path.join(ctx.path, 'src/FileIterator.hpp')
-    oper = Operations.HeaderComment(ctx, filename)
-    oper.run()
+    root_path = 'tests/header-guard'
 
-    operInc = Operations.PreIncludes(ctx, filename)
-    operInc.run()
+    ctx = Context.Context(root_path)
+
+    files = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
+
+    for filename in files:
+        oper = Operations.HeaderComment(ctx, filename)
+        oper.run()
+
+        operInc = Operations.PreIncludes(ctx, filename)
+        operInc.run()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     main()

@@ -74,8 +74,21 @@ def match_comments(lines: List[str]) -> List[MatchResult]:
     return __detect_sections(mr)
 
 
+def match_empty_lines(lines: List[str]) -> List[MatchResult]:
+    ret = []
+    line_n = 0
+    for line in lines:
+        if len(line.strip()) == 0:
+            ret.append(line_n)
+        line_n = line_n + 1
+    mr = MatchResult()
+    mr.lines = ret
+    return __detect_sections(mr)
+
+
 def __detect_sections(total_result: MatchResult) -> List[MatchResult]:
     ret = []
+    mr = MatchResult()
     if(total_result.is_valid()):
         prev_num = total_result.lines[0]
         mr = MatchResult()
