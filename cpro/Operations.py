@@ -6,12 +6,12 @@ from typing import List
 
 
 class Operation:
-    def run(self, context: Context.Context) -> None:
+    def run(self) -> None:
         raise NotImplementedError
 
 
 class FileOperation(Operation):
-    def __init__(self, context: Context.Context, filename: str, output_filename: str) -> None:
+    def __init__(self, context: Context.Context, filename: str) -> None:
         self.file = File.File(filename, context)
         self.lines = self.file.read_lines()
         self.line_ending: str = ''
@@ -23,6 +23,7 @@ class FileOperation(Operation):
             self.line_ending = '\r'
 
     def _delete_lines(self, lines_to_delete: List[int]) -> None:
+        log.debug('Deleting lines: ' + repr(lines_to_delete))
         n_deleted = 0
         for i in lines_to_delete:
             del self.lines[i - n_deleted]
@@ -30,8 +31,8 @@ class FileOperation(Operation):
 
 
 class CommentOperation(FileOperation):
-    def __init__(self, context: Context.Context, filename: str, output_filename: str) -> None:
-        super().__init__(context, filename, output_filename)
+    def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context, filename)
         self.line_width = 80
         self.use_block_comments = False
         self.comment_begin: str = '/* '
@@ -54,6 +55,8 @@ class CommentOperation(FileOperation):
             l_begin = l_begin.rstrip()
             l_end = l_end.lstrip()
             l_fill = self.solid_fill_character
+            if len(text) > 0:
+                text = ' ' + text + ' '
         ret = l_begin + text
         if(len(l_end) > 0):
             ret = ret.ljust(self.line_width - len(l_end), l_fill)
@@ -70,19 +73,15 @@ class CommentOperation(FileOperation):
 
 
 class HeaderComment(CommentOperation):
-    def __init__(self, context: Context.Context, filename: str, output_filename: str) -> None:
-        super().__init__(context, filename, output_filename)
+    def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context, filename)
 
-        first_just = 15
-
+    def run(self)-> None:
         match_result = TextMatchers.match_comments(self.lines)
-        for result in match_result:
-            print(repr(result.lines))
 
         if (len(match_result) > 0):
             possible_header = ''.join(
                 self.lines[match_result[0].lines[0]:match_result[0].lines[-1]])
-            print(possible_header)
             if(self._verify_header(possible_header)):
                 self._delete_lines(match_result[0].lines)
 
@@ -114,3 +113,38 @@ class HeaderComment(CommentOperation):
         ret = ret and ('@date' in header)
         ret = ret and ('@comment' in header)
         return ret
+
+
+class PreIncludes(CommentOperation):
+    def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context, filename)
+
+    def run(self) -> None:
+        predicate = (TextMatchers.PredicateBeginsWith('#include'),)
+        includes = TextMatchers.match_group(self.lines, predicate)
+        for mr in includes:
+            log.debug('Found includes in: ' + repr(mr.lines))
+
+        expected_include_comment_line = includes[0].lines[0] - 1
+        log.debug('Expecting to find include comment in line ' +
+                  str(expected_include_comment_line))
+
+        expected_include_comment = self._create_comment('Includes', solid=True)
+        log.debug('Include comment would be like: ' + expected_include_comment)
+
+        comments = TextMatchers.match_comments(self.lines)
+        deleted_line = False
+        for mr in comments:
+            if not deleted_line:
+                for i in mr.lines:
+                    if i == expected_include_comment_line:
+                        self._delete_lines([i])
+                        deleted_line = False
+                        break
+
+        includes = TextMatchers.match_group(self.lines, predicate)
+
+        self.lines.insert(
+            includes[0].lines[0], expected_include_comment)
+
+        self.file.write_lines(self.lines)

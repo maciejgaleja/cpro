@@ -31,7 +31,6 @@ def match_group(lines: List[str], predicate_group: Tuple) -> List[MatchResult]:
     total_result = MatchResult()
     line_number = 0
     for line in lines:
-        total_result.lines = []
         if predicate_group[0].test(line):
             result = True
             local_line_number = 0
@@ -40,8 +39,6 @@ def match_group(lines: List[str], predicate_group: Tuple) -> List[MatchResult]:
                     result = (result or pred.test(line))
                     total_result.lines.append(line_number+local_line_number)
                     local_line_number = local_line_number+1
-                if result == True:
-                    break
             except:
                 pass
         line_number = line_number + 1
