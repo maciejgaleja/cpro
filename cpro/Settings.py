@@ -24,8 +24,10 @@ class HardcodedSettings(SettingsBase):
         super().__init__()
         self.main = SimpleNamespace()
         self.main.git_executable = 'git'
+
         self.code = SimpleNamespace()
         self.code.line_width = 80
+
         self.comment = SimpleNamespace()
         self.comment.basic_begin = '/* '
         self.comment.basic_end = ' */'
@@ -37,17 +39,20 @@ class HardcodedSettings(SettingsBase):
         self.comment.doxy_is_just_right = False
         self.comment.doxy_just_width = 15
 
+        self.header = SimpleNamespace()
+        self.header.is_block_comment = True
+
 
 class SettingsFile(HardcodedSettings):
     def __init__(self, filename: str) -> None:
         super().__init__()
         self._filename: str = filename
         json_obj: Dict[str, Any] = {}
-        with open(self._filename, 'r') as file:
-            try:
+        try:
+            with open(self._filename, 'r') as file:
                 json_obj = json.load(file)
-            except:
-                json_obj = {}
+        except:
+            json_obj = {}
         for key in json_obj:
             try:
                 nmspc: SimpleNamespace = getattr(self, key)

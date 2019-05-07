@@ -33,6 +33,12 @@ class FileOperation(Operation):
             del self.lines[i - n_deleted]
             n_deleted = n_deleted + 1
 
+    def _insert_before(self, base_line: int, lines: List[str])->None:
+        i: int = base_line
+        for line in lines:
+            self.lines.insert(i, line)
+            i = i + 1
+
 
 class CommentOperation(FileOperation):
     def __init__(self, context: Context.Context, filename: str) -> None:
@@ -53,7 +59,7 @@ class CommentOperation(FileOperation):
             if len(text) > 0:
                 text = ' ' + text + ' '
         ret: str = l_begin + text
-        if(len(l_end) > 0):
+        if (len(l_end) > 0) or solid:
             ret = ret.ljust(
                 self.context.settings.code.line_width - len(l_end), l_fill)
             ret = ret + l_end
@@ -68,6 +74,9 @@ class CommentOperation(FileOperation):
             text = key.ljust(
                 self.context.settings.comment.doxy_just_width) + value
         return self._create_comment(text, continued)
+
+    def _create_line(self, contents)->str:
+        return contents + self.line_ending
 
     def _ensure_empty_line_before(self, line: int) -> None:
         empty_lines = TextMatchers.match_empty_lines(self.lines)
@@ -107,35 +116,48 @@ class HeaderComment(CommentOperation):
             if(self._verify_header(possible_header)):
                 self._delete_lines(match_result[0].lines)
 
-        self.lines.insert(
-            0, self._create_comment('', solid=True))
-        self.lines.insert(
-            1, self._crate_doxy_comment('@filename', self.file.relative_path))
-        self.lines.insert(
-            2, self.create_authors_line())
-        self.lines.insert(
-            3, self._crate_doxy_comment('@date', self.file.date.isoformat()))
-        self.lines.insert(
-            4, self._crate_doxy_comment('@comment', ''))
-        self.lines.insert(
-            5, self._create_comment('', solid=True))
-
-        self._ensure_empty_line_after(5)
+        header_block = self._create_header_block()
+        self._insert_before(0, header_block)
+        self._ensure_empty_line_after(len(header_block))
 
         self.file.write_lines(self.lines)
 
-    def create_authors_line(self)->str:
-        ret = ''
-        first_just = 15
+    def _create_header_block(self)->List[str]:
+        header_block = []
+        continued_comment: bool = True
+        if self.context.settings.header.is_block_comment:
+            continued_comment = True
+            header_block.append(self._create_line(
+                self.context.settings.comment.block_begin))
+        else:
+            continued_comment = False
+        header_block.append(self._create_comment(
+            '', solid=True, continued=continued_comment))
+        header_block.append(self._crate_doxy_comment(
+            '@file', self.file.relative_path, continued=continued_comment))
+
         for author in self.file.authors:
-            ret = ret + self._crate_doxy_comment('@author', repr(author))
-        return ret
+            header_block.append(
+                self._crate_doxy_comment('@author', repr(author), continued=continued_comment))
+
+        header_block.append(self._crate_doxy_comment(
+            '@date', self.file.date.isoformat(), continued=continued_comment))
+        header_block.append(self._crate_doxy_comment(
+            '@brief', '', continued=continued_comment))
+        header_block.append(self._create_comment(
+            '', solid=True, continued=continued_comment))
+
+        if self.context.settings.header.is_block_comment:
+            header_block.append(self._create_line(
+                self.context.settings.comment.block_end))
+
+        return header_block
 
     def _verify_header(self, header: str)->bool:
         ret = True
-        ret = ret and ('@filename' in header)
+        ret = ret and ('@file' in header)
         ret = ret and ('@date' in header)
-        ret = ret and ('@comment' in header)
+        ret = ret and ('@brief' in header)
         return ret
 
 
