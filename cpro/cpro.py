@@ -1,6 +1,7 @@
 import Context
 import Operations
 import logging
+import Settings
 import os
 from typing import List
 
@@ -49,7 +50,7 @@ def get_file_list(start_dir: str, extensions: List[str], recursive: bool = False
 
 
 def main() -> None:
-    root_path = 'tests/header-guard'
+    root_path = 'header-guard'
 
     ctx = Context.Context(root_path)
 

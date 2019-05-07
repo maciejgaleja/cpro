@@ -1,7 +1,7 @@
 import os
 from typing import List
 import subprocess
-
+import Settings
 
 import logging as log
 
@@ -14,6 +14,15 @@ class Context:
             log.debug('Starting cpro in \'' + self.path + '\'')
         except:
             raise  # TODO
+
+        try:
+            self.settings: Settings.SettingsFile = Settings.SettingsFile(
+                os.path.join(self.path, '.cpro.json'))
+        except:
+            raise  # TODO
+
+    def __del__(self) -> None:
+        self.settings.write_to_file()
 
     def git(self, command: List[str]) -> str:
         command_to_call = [self.git_cmd, '--no-pager', '-C', self.path]

@@ -6,12 +6,16 @@ from typing import List
 
 
 class Operation:
-    def run(self) -> None:
+    def __init__(self, context: Context.Context) -> None:
+        self.context: Context.Context = context
+
+    def run(self)->None:
         raise NotImplementedError
 
 
 class FileOperation(Operation):
     def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context)
         self.file = File.File(filename, context)
         self.lines = self.file.read_lines()
         self.line_ending: str = ''
@@ -33,42 +37,36 @@ class FileOperation(Operation):
 class CommentOperation(FileOperation):
     def __init__(self, context: Context.Context, filename: str) -> None:
         super().__init__(context, filename)
-        self.line_width = 80
-        self.use_block_comments = False
-        self.comment_begin: str = '/* '
-        self.comment_continue_begin: str = ' * '
-        self.comment_continue_end: str = ' * '
-        self.comment_end: str = ' */'
-        self.solid_fill_character = '*'
-        self.doxy_just_width: int = 15
-        self.doxy_just_right: bool = False
 
     def _create_comment(self, text: str, continued: bool = False, solid: bool = False)->str:
         if continued:
-            l_begin = self.comment_continue_begin
-            l_end = self.comment_continue_end
+            l_begin = self.context.settings.comment.continued_begin
+            l_end = self.context.settings.comment.continued_end
         else:
-            l_begin = self.comment_begin
-            l_end = self.comment_end
+            l_begin = self.context.settings.comment.basic_begin
+            l_end = self.context.settings.comment.basic_end
         l_fill = ' '
         if solid:
             l_begin = l_begin.rstrip()
             l_end = l_end.lstrip()
-            l_fill = self.solid_fill_character
+            l_fill = self.context.settings.comment.solid_fill_character
             if len(text) > 0:
                 text = ' ' + text + ' '
-        ret = l_begin + text
+        ret: str = l_begin + text
         if(len(l_end) > 0):
-            ret = ret.ljust(self.line_width - len(l_end), l_fill)
+            ret = ret.ljust(
+                self.context.settings.code.line_width - len(l_end), l_fill)
             ret = ret + l_end
         ret = ret + self.line_ending
         return ret
 
     def _crate_doxy_comment(self, key: str, value: str, continued: bool = False)->str:
-        if(self.doxy_just_right):
-            text = (key+' ').rjust(self.doxy_just_width) + value
+        if(self.context.settings.comment.doxy_is_just_right):
+            text = (
+                key+' ').rjust(self.context.settings.comment.doxy_just_width) + value
         else:
-            text = key.ljust(self.doxy_just_width) + value
+            text = key.ljust(
+                self.context.settings.comment.doxy_just_width) + value
         return self._create_comment(text, continued)
 
     def _ensure_empty_line_before(self, line: int) -> None:
