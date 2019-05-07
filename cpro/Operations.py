@@ -6,12 +6,16 @@ from typing import List
 
 
 class Operation:
-    def run(self) -> None:
+    def __init__(self, context: Context.Context) -> None:
+        self.context: Context.Context = context
+
+    def run(self)->None:
         raise NotImplementedError
 
 
 class FileOperation(Operation):
     def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context)
         self.file = File.File(filename, context)
         self.lines = self.file.read_lines()
         self.line_ending: str = ''
@@ -33,7 +37,6 @@ class FileOperation(Operation):
 class CommentOperation(FileOperation):
     def __init__(self, context: Context.Context, filename: str) -> None:
         super().__init__(context, filename)
-        self.line_width = 80
         self.use_block_comments = False
         self.comment_begin: str = '/* '
         self.comment_continue_begin: str = ' * '
@@ -59,7 +62,8 @@ class CommentOperation(FileOperation):
                 text = ' ' + text + ' '
         ret = l_begin + text
         if(len(l_end) > 0):
-            ret = ret.ljust(self.line_width - len(l_end), l_fill)
+            ret = ret.ljust(
+                self.context.settings.code.line_width - len(l_end), l_fill)
             ret = ret + l_end
         ret = ret + self.line_ending
         return ret
