@@ -19,21 +19,6 @@ class SettingsBase:
         return map
 
 
-class SettingsGroup:
-    def __getitem__(self, key: str) -> Any:
-        return self.__dict__[key]
-
-
-class SettingsGroupMain(SettingsGroup):
-    def __init__(self)->None:
-        self.git_executable = 'git'
-
-
-class SettingsGroupCode(SettingsGroup):
-    def __init__(self)->None:
-        self.line_width = 80
-
-
 class HardcodedSettings(SettingsBase):
     def __init__(self) -> None:
         super().__init__()
@@ -41,6 +26,16 @@ class HardcodedSettings(SettingsBase):
         self.main.git_executable = 'git'
         self.code = SimpleNamespace()
         self.code.line_width = 80
+        self.comment = SimpleNamespace()
+        self.comment.basic_begin = '/* '
+        self.comment.basic_end = ' */'
+        self.comment.block_begin = '/**'
+        self.comment.block_end = ' */'
+        self.comment.continued_begin = ' * '
+        self.comment.continued_end = ' * '
+        self.comment.solid_fill_character = '*'
+        self.comment.doxy_is_just_right = False
+        self.comment.doxy_just_width = 15
 
 
 class SettingsFile(HardcodedSettings):
@@ -49,12 +44,16 @@ class SettingsFile(HardcodedSettings):
         self._filename: str = filename
         json_obj: Dict[str, Any] = {}
         with open(self._filename, 'r') as file:
-            json_obj = json.load(file)
+            try:
+                json_obj = json.load(file)
+            except:
+                json_obj = {}
         for key in json_obj:
             try:
                 nmspc: SimpleNamespace = getattr(self, key)
             except:
-                log.warn('Unrecognized section found in settings file: ' + key)
+                log.warn(
+                    'Unrecognized section found in settings file: ' + key)
                 nmspc = SimpleNamespace()
                 setattr(self, key, nmspc)
             for namespace_key in json_obj[key]:
