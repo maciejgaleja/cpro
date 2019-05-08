@@ -4,6 +4,7 @@ import logging
 import Settings
 import os
 from typing import List
+import sys
 
 
 def format_extensions(extensions: List[str]) -> List[str]:
@@ -50,11 +51,17 @@ def get_file_list(start_dir: str, extensions: List[str], recursive: bool = False
 
 
 def main() -> None:
-    root_path = 'header-guard'
+    root_path = '.'
 
     ctx = Context.Context(root_path)
 
-    files = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
+    if len(sys.argv) == 1:
+        files = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
+    elif len(sys.argv) == 2:
+        files = [sys.argv[1]]
+    else:
+        logging.error("Use 0 or 1 argument")
+        return
 
     for filename in files:
         oper = Operations.HeaderComment(ctx, filename)

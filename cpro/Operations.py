@@ -118,7 +118,7 @@ class HeaderComment(CommentOperation):
 
         header_block = self._create_header_block()
         self._insert_before(0, header_block)
-        self._ensure_empty_line_after(len(header_block))
+        self._ensure_empty_line_after(len(header_block) - 1)
 
         self.file.write_lines(self.lines)
 

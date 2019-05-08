@@ -9,8 +9,9 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/cpro/cpro.py",
+            "args": [],
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/tests/"
+            "cwd": "${workspaceFolder}/tests/header-guard/"
         }
     ]
 }
