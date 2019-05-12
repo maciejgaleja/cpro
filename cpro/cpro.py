@@ -73,6 +73,9 @@ def main() -> None:
         oper = Operations.HeaderComment(ctx, filename)
         oper.run()
 
+        oper = Operations.FooterComment(ctx, filename)
+        oper.run()
+
         operInc = Operations.PreIncludes(ctx, filename)
         operInc.run()
 

@@ -10,6 +10,13 @@ class MatchResult:
         return len(self.lines) > 0
 
 
+def join_results(results: List[MatchResult])->MatchResult:
+    ret = MatchResult()
+    for res in results:
+        ret.lines.extend(res.lines)
+    return ret
+
+
 class Predicate:
     def __init__(self) -> None:
         raise NotImplementedError

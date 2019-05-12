@@ -45,6 +45,10 @@ class HardcodedSettings(SettingsBase):
         self.header.template = [
             '/**', '${FILE}', '${AUTHOR}', '${DATE}', '${BRIEF}', '**/']
 
+        self.footer = SimpleNamespace()
+        self.footer.content = [
+            '/******************************************************************************/']
+
 
 class SettingsFile(HardcodedSettings):
     def __init__(self, filename: str) -> None:

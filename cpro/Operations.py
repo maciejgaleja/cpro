@@ -164,6 +164,27 @@ class HeaderComment(CommentOperation):
         return ret
 
 
+class FooterComment(CommentOperation):
+    def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context, filename)
+
+    def run(self)-> None:
+        comments = TextMatchers.join_results(
+            TextMatchers.match_comments(self.lines))
+        if len(self.lines) - 1 in comments.lines:
+            self._delete_lines([-1])
+        else:
+            pass
+
+        if (not len(self.lines[-1]) == 0) and (not self.lines[-1] == self.line_ending):
+            self.lines.append(self.line_ending)
+
+        for line in self.context.settings.footer.content:
+            self.lines.append(line + self.line_ending)
+
+        self.file.write_lines(self.lines)
+
+
 class PreIncludes(CommentOperation):
     def __init__(self, context: Context.Context, filename: str) -> None:
         super().__init__(context, filename)
