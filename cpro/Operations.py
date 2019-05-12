@@ -75,7 +75,7 @@ class CommentOperation(FileOperation):
                 self.context.settings.comment.doxy_just_width) + value
         return self._create_comment(text, continued)
 
-    def _create_line(self, contents)->str:
+    def _create_line(self, contents: str)->str:
         return contents + self.line_ending
 
     def _ensure_empty_line_before(self, line: int) -> None:
@@ -122,35 +122,26 @@ class HeaderComment(CommentOperation):
 
         self.file.write_lines(self.lines)
 
-    def _create_header_block(self)->List[str]:
+    def _create_header_block(self)->str:
         header_block = []
-        continued_comment: bool = True
-        if self.context.settings.header.is_block_comment:
-            continued_comment = True
-            header_block.append(self._create_line(
-                self.context.settings.comment.block_begin))
-        else:
-            continued_comment = False
-        header_block.append(self._create_comment(
-            '', solid=True, continued=continued_comment))
-        header_block.append(self._crate_doxy_comment(
-            '@file', self.file.relative_path, continued=continued_comment))
+        continued_comment: bool = self.context.settings.header.is_block_comment
 
-        for author in self.file.authors:
-            header_block.append(
-                self._crate_doxy_comment('@author', repr(author), continued=continued_comment))
-
-        header_block.append(self._crate_doxy_comment(
-            '@date', self.file.date.isoformat(), continued=continued_comment))
-        header_block.append(self._crate_doxy_comment(
-            '@brief', '', continued=continued_comment))
-        header_block.append(self._create_comment(
-            '', solid=True, continued=continued_comment))
-
-        if self.context.settings.header.is_block_comment:
-            header_block.append(self._create_line(
-                self.context.settings.comment.block_end))
-
+        for line in self.context.settings.header.template:
+            if line == '${AUTHOR}':
+                for author in self.file.authors:
+                    header_block.append(
+                        self._crate_doxy_comment('@author', repr(author), continued=continued_comment))
+            elif line == '${FILE}':
+                header_block.append(self._crate_doxy_comment(
+                    '@file', self.file.relative_path, continued=continued_comment))
+            elif line == '${DATE}':
+                header_block.append(self._crate_doxy_comment(
+                    '@date', self.file.date.isoformat(), continued=continued_comment))
+            elif line == '${BRIEF}':
+                header_block.append(self._crate_doxy_comment(
+                    '@brief', '', continued=continued_comment))
+            else:
+                header_block.append(line + self.line_ending)
         return header_block
 
     def _verify_header(self, header: str)->bool:
