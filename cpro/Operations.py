@@ -19,13 +19,6 @@ class FileOperation(Operation):
         super().__init__(context)
         self.file = File.File(filename, context)
         self.lines = self.file.read_lines()
-        self.line_ending: str = ''
-        if(self.lines[0][-2:] == '\r\n'):
-            self.line_ending = '\r\n'
-        elif(self.lines[0][-1:] == '\n'):
-            self.line_ending = '\n'
-        elif(self.lines[0][-1:] == '\r'):
-            self.line_ending = '\r'
 
     def _delete_lines(self, lines_to_delete: List[int]) -> None:
         log.debug('Deleting lines: ' + repr(lines_to_delete))
@@ -64,7 +57,6 @@ class CommentOperation(FileOperation):
             ret = ret.ljust(
                 self.context.settings.code.line_width - len(l_end), l_fill)
             ret = ret + l_end
-        ret = ret + self.line_ending
         return ret
 
     def _crate_doxy_comment(self, key: str, value: str, continued: bool = False)->str:
@@ -76,9 +68,6 @@ class CommentOperation(FileOperation):
                 self.context.settings.comment.doxy_just_width) + value
         return self._create_comment(text, continued)
 
-    def _create_line(self, contents: str)->str:
-        return contents + self.line_ending
-
     def _ensure_empty_line_before(self, line: int) -> None:
         empty_lines = TextMatchers.match_empty_lines(self.lines)
         empty_line_present = False
@@ -89,7 +78,7 @@ class CommentOperation(FileOperation):
                         empty_line_present = True
                         break
         if not empty_line_present:
-            self.lines.insert(line, self.line_ending)
+            self.lines.insert(line, '')
 
     def _ensure_empty_line_after(self, line: int) -> None:
         empty_lines = TextMatchers.match_empty_lines(self.lines)
@@ -101,7 +90,7 @@ class CommentOperation(FileOperation):
                         empty_line_present = True
                         break
         if not empty_line_present:
-            self.lines.insert(line + 1, self.line_ending)
+            self.lines.insert(line + 1, '')
 
 
 class HeaderComment(CommentOperation):
@@ -141,7 +130,7 @@ class HeaderComment(CommentOperation):
                 header_block.append(self._crate_doxy_comment(
                     '@brief', '', continued=continued_comment))
             else:
-                header_block.append(line + self.line_ending)
+                header_block.append(line)
         return header_block
 
     def _create_FILE_part(self, continued: bool = False)->str:
@@ -176,11 +165,11 @@ class FooterComment(CommentOperation):
         else:
             pass
 
-        if (not len(self.lines[-1]) == 0) and (not self.lines[-1] == self.line_ending):
-            self.lines.append(self.line_ending)
+        if not len(self.lines[-1]) == 0:
+            self.lines.append('')
 
         for line in self.context.settings.footer.content:
-            self.lines.append(line + self.line_ending)
+            self.lines.append(line)
 
         self.file.write_lines(self.lines)
 
@@ -228,3 +217,14 @@ class PreIncludes(CommentOperation):
             # TODO: what if there are no includes in this file?
 
         self.file.write_lines(self.lines)
+
+
+class ClangFormatOperation(FileOperation):
+    def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context, filename)
+
+    def run(self) -> None:
+        formatted_string = self.context.clang_format(
+            ['-style=file', self.file.absolute_path])
+        formatted_lines = formatted_string.splitlines()
+        self.file.write_lines(formatted_lines)

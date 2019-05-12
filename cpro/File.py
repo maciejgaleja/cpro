@@ -28,6 +28,7 @@ class File:
             self.relative_path: str = self.absolute_path.replace(
                 context.path, '')[1:]
             os.stat(self.absolute_path)
+
         except:
             raise  # TODO
 
@@ -38,12 +39,28 @@ class File:
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
+            self.line_ending: str = ''
         except:
             raise  # TODO
 
     def read_lines(self) -> List[str]:
+        data = []
         with open(self.absolute_path, 'r', newline='') as f:
-            data = f.readlines()
+            data_str = f.read()
+
+        data = data_str.splitlines()
+
+        if(data[0][-2:] == '\r\n'):
+            self.line_ending = '\r\n'
+        elif(data[0][-1:] == '\n'):
+            self.line_ending = '\n'
+        elif(data[0][-1:] == '\r'):
+            self.line_ending = '\r'
+
+        for line in data:
+            line = line.replace('\r', '')
+            line = line.replace('\n', '')
+
         return data
 
     def write_lines(self, lines: List[str]) ->None:
@@ -52,6 +69,7 @@ class File:
             with open(self.absolute_path, 'w', newline='') as f:
                 for line in lines:
                     f.write(line)
+                    f.write(self.context.settings.code.newline)
         else:
             log.debug(self.relative_path + ": not changed")
 

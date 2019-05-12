@@ -24,12 +24,14 @@ class HardcodedSettings(SettingsBase):
         super().__init__()
         self.main = SimpleNamespace()
         self.main.git_executable = 'git'
+        self.main.clang_format_executable = 'clang-format'
 
         self.metadata = SimpleNamespace()
         self.metadata.authors_exclude = [""]
 
         self.code = SimpleNamespace()
         self.code.line_width = 80
+        self.code.newline = '\n'
 
         self.comment = SimpleNamespace()
         self.comment.basic_begin = '/* '

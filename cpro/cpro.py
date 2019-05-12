@@ -73,13 +73,16 @@ def main() -> None:
         oper = Operations.HeaderComment(ctx, filename)
         oper.run()
 
-        oper = Operations.FooterComment(ctx, filename)
-        oper.run()
+        oper2 = Operations.FooterComment(ctx, filename)
+        oper2.run()
+
+        oper3 = Operations.ClangFormatOperation(ctx, filename)
+        oper3.run()
 
         operInc = Operations.PreIncludes(ctx, filename)
         operInc.run()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     main()
