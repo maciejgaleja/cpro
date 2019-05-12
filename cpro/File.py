@@ -61,7 +61,8 @@ class File:
                 author.name = lines[line_number].replace('author', '').strip()
                 author.email = lines[line_number +
                                      1].replace('author-mail', '').replace('<', '').replace('>', '').strip()
-                all_authors.append(author)
+                if not author.name in self.context.settings.metadata.authors_exclude:
+                    all_authors.append(author)
             line_number = line_number + 1
 
         hashed_authors = {}

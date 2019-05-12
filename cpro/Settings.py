@@ -25,6 +25,9 @@ class HardcodedSettings(SettingsBase):
         self.main = SimpleNamespace()
         self.main.git_executable = 'git'
 
+        self.metadata = SimpleNamespace()
+        self.metadata.authors_exclude = [""]
+
         self.code = SimpleNamespace()
         self.code.line_width = 80
 
