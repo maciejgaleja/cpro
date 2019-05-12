@@ -46,5 +46,5 @@ class Context:
             log.error(' '.join(command_to_call) +
                       ' command returned non-zero return status.\n' + str(ret))
             raise Exception()
-        return_str = ret.stdout.decode('utf-8')
+        return_str: str = ret.stdout.decode('utf-8')
         return return_str

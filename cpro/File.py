@@ -43,7 +43,7 @@ class File:
             raise  # TODO
 
     def read_lines(self) -> List[str]:
-        data = []
+        data: List[str] = []
         with open(self.absolute_path, 'r', newline='') as f:
             data_str = f.read()
 

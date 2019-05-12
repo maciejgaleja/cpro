@@ -15,9 +15,9 @@ class Operation:
 
 
 class FileOperation(Operation):
-    def __init__(self, context: Context.Context, filename: str) -> None:
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
         super().__init__(context)
-        self.file = File.File(filename, context)
+        self.file = file_object
         self.lines = self.file.read_lines()
 
     def _delete_lines(self, lines_to_delete: List[int]) -> None:
@@ -35,8 +35,8 @@ class FileOperation(Operation):
 
 
 class CommentOperation(FileOperation):
-    def __init__(self, context: Context.Context, filename: str) -> None:
-        super().__init__(context, filename)
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
+        super().__init__(context, file_object)
 
     def _create_comment(self, text: str, continued: bool = False, solid: bool = False)->str:
         if continued:
@@ -94,8 +94,8 @@ class CommentOperation(FileOperation):
 
 
 class HeaderComment(CommentOperation):
-    def __init__(self, context: Context.Context, filename: str) -> None:
-        super().__init__(context, filename)
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
+        super().__init__(context, file_object)
 
     def run(self)-> None:
         match_result = TextMatchers.match_comments(self.lines)
@@ -154,8 +154,8 @@ class HeaderComment(CommentOperation):
 
 
 class FooterComment(CommentOperation):
-    def __init__(self, context: Context.Context, filename: str) -> None:
-        super().__init__(context, filename)
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
+        super().__init__(context, file_object)
 
     def run(self)-> None:
         comments = TextMatchers.join_results(
@@ -175,8 +175,8 @@ class FooterComment(CommentOperation):
 
 
 class PreIncludes(CommentOperation):
-    def __init__(self, context: Context.Context, filename: str) -> None:
-        super().__init__(context, filename)
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
+        super().__init__(context, file_object)
 
     def run(self) -> None:
         predicate = (TextMatchers.PredicateBeginsWith('#include'),)
@@ -220,8 +220,8 @@ class PreIncludes(CommentOperation):
 
 
 class ClangFormatOperation(FileOperation):
-    def __init__(self, context: Context.Context, filename: str) -> None:
-        super().__init__(context, filename)
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
+        super().__init__(context, file_object)
 
     def run(self) -> None:
         formatted_string = self.context.clang_format(
