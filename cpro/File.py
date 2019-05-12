@@ -39,7 +39,6 @@ class File:
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
-            self.line_ending: str = ''
         except:
             raise  # TODO
 
@@ -49,13 +48,6 @@ class File:
             data_str = f.read()
 
         data = data_str.splitlines()
-
-        if(data[0][-2:] == '\r\n'):
-            self.line_ending = '\r\n'
-        elif(data[0][-1:] == '\n'):
-            self.line_ending = '\n'
-        elif(data[0][-1:] == '\r'):
-            self.line_ending = '\r'
 
         for line in data:
             line = line.replace('\r', '')
