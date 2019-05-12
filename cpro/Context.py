@@ -2,8 +2,9 @@ import os
 from typing import List, Any
 import subprocess
 import Settings
-
+import OutputManager
 import logging as log
+import ProgressReporter
 
 
 class Context:
@@ -21,6 +22,10 @@ class Context:
                 os.path.join(self.path, '.cpro.json'))
         except:
             raise  # TODO
+
+        self.output: OutputManager.OutputManager = OutputManager.OutputManager()
+        self.reporter: ProgressReporter.ProgressReporter = ProgressReporter.ProgressReporter(
+            self.output)
 
     def __del__(self) -> None:
         self.settings.write_to_file()

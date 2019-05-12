@@ -23,6 +23,8 @@ class Author:
 
 class File:
     def __init__(self, filename: str, context: Context.Context) -> None:
+        self.context: Context.Context = context
+
         try:
             self.absolute_path: str = os.path.abspath(filename)
             self.relative_path: str = self.absolute_path.replace(
@@ -32,16 +34,16 @@ class File:
         except:
             raise  # TODO
 
-        self.context: Context.Context = context
-
+    def open(self)->None:
         try:
             blame_str = self.context.git(
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
-            self.lines = self._read_lines()
         except:
             raise  # TODO
+
+        self.lines = self._read_lines()
 
     def _read_lines(self) -> List[str]:
         data: List[str] = []
