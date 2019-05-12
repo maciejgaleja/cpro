@@ -3,6 +3,7 @@ import Context
 import TextMatchers
 import logging as log
 from typing import List
+import os
 
 
 class Operation:
@@ -122,7 +123,7 @@ class HeaderComment(CommentOperation):
 
         self.file.write_lines(self.lines)
 
-    def _create_header_block(self)->str:
+    def _create_header_block(self)->List[str]:
         header_block = []
         continued_comment: bool = self.context.settings.header.is_block_comment
 
@@ -132,8 +133,7 @@ class HeaderComment(CommentOperation):
                     header_block.append(
                         self._crate_doxy_comment('@author', repr(author), continued=continued_comment))
             elif line == '${FILE}':
-                header_block.append(self._crate_doxy_comment(
-                    '@file', self.file.relative_path, continued=continued_comment))
+                header_block.append(self._create_FILE_part(continued_comment))
             elif line == '${DATE}':
                 header_block.append(self._crate_doxy_comment(
                     '@date', self.file.date.isoformat(), continued=continued_comment))
@@ -143,6 +143,18 @@ class HeaderComment(CommentOperation):
             else:
                 header_block.append(line + self.line_ending)
         return header_block
+
+    def _create_FILE_part(self, continued: bool = False)->str:
+        ret = ''
+        file_path = self.file.relative_path
+        for path_spec in self.context.settings.header.file_base_path:
+            potential_part_to_remove = os.path.join(*path_spec)
+            if(file_path.startswith(potential_part_to_remove)) and len(potential_part_to_remove) > 0:
+                file_path = file_path[len(potential_part_to_remove)+1:]
+                break
+        ret = self._crate_doxy_comment(
+            '@file', file_path, continued=continued)
+        return ret
 
     def _verify_header(self, header: str)->bool:
         ret = True

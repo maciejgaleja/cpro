@@ -41,6 +41,7 @@ class HardcodedSettings(SettingsBase):
 
         self.header = SimpleNamespace()
         self.header.is_block_comment = True
+        self.header.file_base_path = [[""]]
         self.header.template = [
             '/**', '${FILE}', '${AUTHOR}', '${DATE}', '${BRIEF}', '**/']
 
