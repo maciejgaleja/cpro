@@ -39,10 +39,11 @@ class File:
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
+            self.lines = self._read_lines()
         except:
             raise  # TODO
 
-    def read_lines(self) -> List[str]:
+    def _read_lines(self) -> List[str]:
         data: List[str] = []
         with open(self.absolute_path, 'r', newline='') as f:
             data_str = f.read()
@@ -56,10 +57,13 @@ class File:
         return data
 
     def write_lines(self, lines: List[str]) ->None:
-        current_contents = self.read_lines()
-        if not lines == current_contents:
+        self.lines = lines
+
+    def write_to_disk(self)->None:
+        current_contents = self._read_lines()
+        if not self.lines == current_contents:
             with open(self.absolute_path, 'w', newline='') as f:
-                for line in lines:
+                for line in self.lines:
                     f.write(line)
                     f.write(self.context.settings.code.newline)
         else:

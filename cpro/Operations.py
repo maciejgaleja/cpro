@@ -18,7 +18,7 @@ class FileOperation(Operation):
     def __init__(self, context: Context.Context, file_object: File.File) -> None:
         super().__init__(context)
         self.file = file_object
-        self.lines = self.file.read_lines()
+        self.lines = self.file.lines
 
     def _delete_lines(self, lines_to_delete: List[int]) -> None:
         log.debug('Deleting lines: ' + repr(lines_to_delete))
@@ -224,7 +224,8 @@ class ClangFormatOperation(FileOperation):
         super().__init__(context, file_object)
 
     def run(self) -> None:
+        input_str = self.context.settings.code.newline.join(self.lines)
         formatted_string = self.context.clang_format(
-            ['-style=file', self.file.absolute_path])
+            ['-style=file'], stdin=input_str)
         formatted_lines = formatted_string.splitlines()
         self.file.write_lines(formatted_lines)

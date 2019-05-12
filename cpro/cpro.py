@@ -85,6 +85,8 @@ def main() -> None:
         operInc = Operations.PreIncludes(ctx, file)
         operInc.run()
 
+        file.write_to_disk()
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

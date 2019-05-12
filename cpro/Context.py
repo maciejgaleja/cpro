@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Any
 import subprocess
 import Settings
 
@@ -35,13 +35,18 @@ class Context:
             raise Exception()
         return str(ret.stdout)
 
-    def clang_format(self, command: List[str]) -> str:
+    def clang_format(self, command: List[str], stdin: str = '') -> str:
+        input_bytes: Any = None
+        if not len(stdin) == 0:
+            input_bytes = bytes(stdin, 'utf-8')
+
         # TODO: make it generic, this code is duplicated
         command_to_call: List[str] = [
             self.settings.main.clang_format_executable]
         command_to_call.extend(command)
         log.debug('Calling \'' + ' '.join(command_to_call))
-        ret = subprocess.run(command_to_call, capture_output=True)
+        ret = subprocess.run(
+            command_to_call, capture_output=True, input=input_bytes)
         if not (ret.returncode == 0):
             log.error(' '.join(command_to_call) +
                       ' command returned non-zero return status.\n' + str(ret))

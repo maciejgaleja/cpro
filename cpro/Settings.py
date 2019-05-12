@@ -84,6 +84,5 @@ class SettingsFile(HardcodedSettings):
 
     def write_to_file(self)->None:
         json_str: str = json.dumps(self.as_dict(), indent=4, sort_keys=True)
-        print(json_str)
         with open(self._filename, 'w') as file:
             file.write(json_str)
