@@ -5,6 +5,7 @@ import Settings
 import os
 from typing import List
 import sys
+import version
 
 
 def format_extensions(extensions: List[str]) -> List[str]:
@@ -50,7 +51,12 @@ def get_file_list(start_dir: str, extensions: List[str], recursive: bool = False
     return files
 
 
+def print_version() -> None:
+    print('v' + version.version)
+
+
 def main() -> None:
+    print_version()
     root_path = '.'
 
     ctx = Context.Context(root_path)
