@@ -3,6 +3,7 @@ import Context
 import TextMatchers
 import logging as log
 from typing import List
+import os
 
 
 class Operation:
@@ -33,6 +34,12 @@ class FileOperation(Operation):
             del self.lines[i - n_deleted]
             n_deleted = n_deleted + 1
 
+    def _insert_before(self, base_line: int, lines: List[str])->None:
+        i: int = base_line
+        for line in lines:
+            self.lines.insert(i, line)
+            i = i + 1
+
 
 class CommentOperation(FileOperation):
     def __init__(self, context: Context.Context, filename: str) -> None:
@@ -53,7 +60,7 @@ class CommentOperation(FileOperation):
             if len(text) > 0:
                 text = ' ' + text + ' '
         ret: str = l_begin + text
-        if(len(l_end) > 0):
+        if (len(l_end) > 0) or solid:
             ret = ret.ljust(
                 self.context.settings.code.line_width - len(l_end), l_fill)
             ret = ret + l_end
@@ -68,6 +75,9 @@ class CommentOperation(FileOperation):
             text = key.ljust(
                 self.context.settings.comment.doxy_just_width) + value
         return self._create_comment(text, continued)
+
+    def _create_line(self, contents: str)->str:
+        return contents + self.line_ending
 
     def _ensure_empty_line_before(self, line: int) -> None:
         empty_lines = TextMatchers.match_empty_lines(self.lines)
@@ -107,36 +117,72 @@ class HeaderComment(CommentOperation):
             if(self._verify_header(possible_header)):
                 self._delete_lines(match_result[0].lines)
 
-        self.lines.insert(
-            0, self._create_comment('', solid=True))
-        self.lines.insert(
-            1, self._crate_doxy_comment('@filename', self.file.relative_path))
-        self.lines.insert(
-            2, self.create_authors_line())
-        self.lines.insert(
-            3, self._crate_doxy_comment('@date', self.file.date.isoformat()))
-        self.lines.insert(
-            4, self._crate_doxy_comment('@comment', ''))
-        self.lines.insert(
-            5, self._create_comment('', solid=True))
-
-        self._ensure_empty_line_after(5)
+        header_block = self._create_header_block()
+        self._insert_before(0, header_block)
+        self._ensure_empty_line_after(len(header_block) - 1)
 
         self.file.write_lines(self.lines)
 
-    def create_authors_line(self)->str:
+    def _create_header_block(self)->List[str]:
+        header_block = []
+        continued_comment: bool = self.context.settings.header.is_block_comment
+
+        for line in self.context.settings.header.template:
+            if line == '${AUTHOR}':
+                for author in self.file.authors:
+                    header_block.append(
+                        self._crate_doxy_comment('@author', repr(author), continued=continued_comment))
+            elif line == '${FILE}':
+                header_block.append(self._create_FILE_part(continued_comment))
+            elif line == '${DATE}':
+                header_block.append(self._crate_doxy_comment(
+                    '@date', self.file.date.isoformat(), continued=continued_comment))
+            elif line == '${BRIEF}':
+                header_block.append(self._crate_doxy_comment(
+                    '@brief', '', continued=continued_comment))
+            else:
+                header_block.append(line + self.line_ending)
+        return header_block
+
+    def _create_FILE_part(self, continued: bool = False)->str:
         ret = ''
-        first_just = 15
-        for author in self.file.authors:
-            ret = ret + self._crate_doxy_comment('@author', repr(author))
+        file_path = self.file.relative_path
+        for path_spec in self.context.settings.header.file_base_path:
+            potential_part_to_remove = os.path.join(*path_spec)
+            if(file_path.startswith(potential_part_to_remove)) and len(potential_part_to_remove) > 0:
+                file_path = file_path[len(potential_part_to_remove)+1:]
+                break
+        ret = self._crate_doxy_comment(
+            '@file', file_path, continued=continued)
         return ret
 
     def _verify_header(self, header: str)->bool:
         ret = True
-        ret = ret and ('@filename' in header)
+        ret = ret and ('@file' in header)
         ret = ret and ('@date' in header)
-        ret = ret and ('@comment' in header)
+        ret = ret and ('@brief' in header)
         return ret
+
+
+class FooterComment(CommentOperation):
+    def __init__(self, context: Context.Context, filename: str) -> None:
+        super().__init__(context, filename)
+
+    def run(self)-> None:
+        comments = TextMatchers.join_results(
+            TextMatchers.match_comments(self.lines))
+        if len(self.lines) - 1 in comments.lines:
+            self._delete_lines([-1])
+        else:
+            pass
+
+        if (not len(self.lines[-1]) == 0) and (not self.lines[-1] == self.line_ending):
+            self.lines.append(self.line_ending)
+
+        for line in self.context.settings.footer.content:
+            self.lines.append(line + self.line_ending)
+
+        self.file.write_lines(self.lines)
 
 
 class PreIncludes(CommentOperation):

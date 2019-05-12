@@ -4,6 +4,8 @@ import logging
 import Settings
 import os
 from typing import List
+import sys
+import version
 
 
 def format_extensions(extensions: List[str]) -> List[str]:
@@ -49,15 +51,29 @@ def get_file_list(start_dir: str, extensions: List[str], recursive: bool = False
     return files
 
 
+def print_version() -> None:
+    print('v' + version.version)
+
+
 def main() -> None:
-    root_path = 'header-guard'
+    print_version()
+    root_path = '.'
 
     ctx = Context.Context(root_path)
 
-    files = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
+    if len(sys.argv) == 1:
+        files = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
+    elif len(sys.argv) == 2:
+        files = [sys.argv[1]]
+    else:
+        logging.error("Use 0 or 1 argument")
+        return
 
     for filename in files:
         oper = Operations.HeaderComment(ctx, filename)
+        oper.run()
+
+        oper = Operations.FooterComment(ctx, filename)
         oper.run()
 
         operInc = Operations.PreIncludes(ctx, filename)
