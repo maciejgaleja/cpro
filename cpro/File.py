@@ -48,12 +48,6 @@ class File:
 
     def write_lines(self, lines: List[str]) ->None:
         current_contents = self.read_lines()
-        eq_counter = 0
-        i = 0
-        for line in lines:
-            if line == current_contents[i]:
-                eq_counter = eq_counter+1
-            i = i+1
         if not lines == current_contents:
             with open(self.absolute_path, 'w', newline='') as f:
                 for line in lines:
