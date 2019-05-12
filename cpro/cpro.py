@@ -1,5 +1,6 @@
 import Context
 import Operations
+import File
 import logging
 import Settings
 import os
@@ -70,14 +71,21 @@ def main() -> None:
         return
 
     for filename in files:
-        oper = Operations.HeaderComment(ctx, filename)
+        file = File.File(filename, ctx)
+
+        oper = Operations.HeaderComment(ctx, file)
         oper.run()
 
-        oper = Operations.FooterComment(ctx, filename)
-        oper.run()
+        oper2 = Operations.FooterComment(ctx, file)
+        oper2.run()
 
-        operInc = Operations.PreIncludes(ctx, filename)
+        oper3 = Operations.ClangFormatOperation(ctx, file)
+        oper3.run()
+
+        operInc = Operations.PreIncludes(ctx, file)
         operInc.run()
+
+        file.write_to_disk()
 
 
 if __name__ == "__main__":

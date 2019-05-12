@@ -24,12 +24,14 @@ class HardcodedSettings(SettingsBase):
         super().__init__()
         self.main = SimpleNamespace()
         self.main.git_executable = 'git'
+        self.main.clang_format_executable = 'clang-format'
 
         self.metadata = SimpleNamespace()
         self.metadata.authors_exclude = [""]
 
         self.code = SimpleNamespace()
         self.code.line_width = 80
+        self.code.newline = '\n'
 
         self.comment = SimpleNamespace()
         self.comment.basic_begin = '/* '
@@ -82,6 +84,5 @@ class SettingsFile(HardcodedSettings):
 
     def write_to_file(self)->None:
         json_str: str = json.dumps(self.as_dict(), indent=4, sort_keys=True)
-        print(json_str)
         with open(self._filename, 'w') as file:
             file.write(json_str)

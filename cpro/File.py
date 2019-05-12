@@ -28,6 +28,7 @@ class File:
             self.relative_path: str = self.absolute_path.replace(
                 context.path, '')[1:]
             os.stat(self.absolute_path)
+
         except:
             raise  # TODO
 
@@ -38,18 +39,35 @@ class File:
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
+            self.lines = self._read_lines()
         except:
             raise  # TODO
 
-    def read_lines(self) -> List[str]:
+    def _read_lines(self) -> List[str]:
+        data: List[str] = []
         with open(self.absolute_path, 'r', newline='') as f:
-            data = f.readlines()
+            data_str = f.read()
+
+        data = data_str.splitlines()
+
+        for line in data:
+            line = line.replace('\r', '')
+            line = line.replace('\n', '')
+
         return data
 
     def write_lines(self, lines: List[str]) ->None:
-        with open(self.absolute_path, 'w', newline='') as f:
-            for line in lines:
-                f.write(line)
+        self.lines = lines
+
+    def write_to_disk(self)->None:
+        current_contents = self._read_lines()
+        if not self.lines == current_contents:
+            with open(self.absolute_path, 'w', newline='') as f:
+                for line in self.lines:
+                    f.write(line)
+                    f.write(self.context.settings.code.newline)
+        else:
+            log.debug(self.relative_path + ": not changed")
 
     def _read_authors(self, blame_str: str)->List[Author]:
         lines = blame_str.split('\\n')
