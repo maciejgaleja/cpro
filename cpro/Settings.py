@@ -26,6 +26,11 @@ class HardcodedSettings(SettingsBase):
         self.main.git_executable = 'git'
         self.main.clang_format_executable = 'clang-format'
 
+        self.scope = SimpleNamespace()
+        self.scope.source_directories = ["."]
+        self.scope.extensions_source = ["c", "cpp", "cxx", "cc"]
+        self.scope.extensions_header = ["h", "hpp", "hxx"]
+
         self.metadata = SimpleNamespace()
         self.metadata.authors_exclude = [""]
 
