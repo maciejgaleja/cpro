@@ -61,15 +61,18 @@ class File:
     def write_lines(self, lines: List[str]) ->None:
         self.lines = lines
 
-    def write_to_disk(self)->None:
+    def write_to_disk(self)->bool:
+        ret: bool = False
         current_contents = self._read_lines()
         if not self.lines == current_contents:
             with open(self.absolute_path, 'w', newline='') as f:
                 for line in self.lines:
                     f.write(line)
                     f.write(self.context.settings.code.newline)
+                    ret = True
         else:
-            log.debug(self.relative_path + ": not changed")
+            ret = False
+        return ret
 
     def _read_authors(self, blame_str: str)->List[Author]:
         lines = blame_str.split('\\n')

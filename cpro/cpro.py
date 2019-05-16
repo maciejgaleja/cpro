@@ -55,9 +55,14 @@ def main() -> None:
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.CLANG, 1)
 
-        file.write_to_disk()
-
-        print('✔❌')
+        file_changed = file.write_to_disk()
+        file_status = 0
+        if file_changed:
+            file_status = 1
+        else:
+            file_status = -1
+        ctx.reporter.update_item(
+            file.relative_path, ProgressReporter.CproStage.FILE_MODIFIED, file_status)
 
 
 if __name__ == "__main__":
