@@ -7,6 +7,7 @@ import os
 from typing import List
 import sys
 import version
+import ProgressReporter
 
 
 def format_extensions(extensions: List[str]) -> List[str]:
@@ -63,31 +64,47 @@ def main() -> None:
     ctx = Context.Context(root_path)
 
     if len(sys.argv) == 1:
-        files = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
+        filenames = get_file_list(root_path, ['.cpp', '.hpp', '.h'], True)
     elif len(sys.argv) == 2:
-        files = [sys.argv[1]]
+        filenames = [sys.argv[1]]
     else:
         logging.error("Use 0 or 1 argument")
         return
 
-    for filename in files:
+    files: List[File.File] = []
+    for filename in filenames:
         file = File.File(filename, ctx)
+        files.append(file)
+        ctx.reporter.update(ProgressReporter.ReportItem(file.relative_path))
+
+    for file in files:
+        file.open()
+        ctx.reporter.update_item(
+            file.relative_path, ProgressReporter.CproStage.OPEN, 1)
 
         oper = Operations.HeaderComment(ctx, file)
         oper.run()
-
-        oper2 = Operations.FooterComment(ctx, file)
-        oper2.run()
-
-        oper3 = Operations.ClangFormatOperation(ctx, file)
-        oper3.run()
+        ctx.reporter.update_item(
+            file.relative_path, ProgressReporter.CproStage.HEADER, 1)
 
         operInc = Operations.PreIncludes(ctx, file)
         operInc.run()
+        ctx.reporter.update_item(
+            file.relative_path, ProgressReporter.CproStage.INCLUDE, 1)
+
+        oper2 = Operations.FooterComment(ctx, file)
+        oper2.run()
+        ctx.reporter.update_item(
+            file.relative_path, ProgressReporter.CproStage.FOOTER, 1)
+
+        oper3 = Operations.ClangFormatOperation(ctx, file)
+        oper3.run()
+        ctx.reporter.update_item(
+            file.relative_path, ProgressReporter.CproStage.CLANG, 1)
 
         file.write_to_disk()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.CRITICAL)
     main()
