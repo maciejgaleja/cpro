@@ -33,28 +33,24 @@ class Context:
         command_to_call = [self.settings.main.git_executable,
                            '--no-pager', '-C', self.path]
         command_to_call.extend(command)
-        log.debug('Calling \'' + ' '.join(command_to_call))
-        ret = subprocess.run(command_to_call, capture_output=True)
-        if not (ret.returncode == 0):
-            log.error('Git command returned non-zero return status.\n' + str(ret))
-            raise Exception()
-        return str(ret.stdout)
+        return self._call_command(command_to_call)
 
     def clang_format(self, command: List[str], stdin: str = '') -> str:
+        command_to_call: List[str] = [
+            self.settings.main.clang_format_executable]
+        command_to_call.extend(command)
+        return self._call_command(command_to_call, stdin)
+
+    def _call_command(self, command: List[str], stdin: str = '') -> str:
         input_bytes: Any = None
         if not len(stdin) == 0:
             input_bytes = bytes(stdin, 'utf-8')
 
-        # TODO: make it generic, this code is duplicated
-        command_to_call: List[str] = [
-            self.settings.main.clang_format_executable]
-        command_to_call.extend(command)
-        log.debug('Calling \'' + ' '.join(command_to_call))
+        log.debug('Calling \'' + ' '.join(command))
         ret = subprocess.run(
-            command_to_call, capture_output=True, input=input_bytes)
+            command, capture_output=True, input=input_bytes)
         if not (ret.returncode == 0):
-            log.error(' '.join(command_to_call) +
+            log.error(' '.join(command) +
                       ' command returned non-zero return status.\n' + str(ret))
             raise Exception()
-        return_str: str = ret.stdout.decode('utf-8')
-        return return_str
+        return ret.stdout.decode('utf-8')
