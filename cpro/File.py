@@ -75,7 +75,7 @@ class File:
         return ret
 
     def _read_authors(self, blame_str: str)->List[Author]:
-        lines = blame_str.split('\\n')
+        lines = blame_str.split('\n')
         all_authors = []
         line_number = 0
         for line in lines:
@@ -97,7 +97,7 @@ class File:
         return ret
 
     def _read_date(self, blame_str: str) -> datetime.date:
-        lines = blame_str.split('\\n')
+        lines = blame_str.split('\n')
         timestamps = []
         for line in lines:
             if ('author-time ' in line):
