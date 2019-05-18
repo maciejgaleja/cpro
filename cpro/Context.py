@@ -5,6 +5,7 @@ import Settings
 import OutputManager
 import logging as log
 import ProgressReporter
+import Errors
 
 
 class Context:
@@ -15,13 +16,13 @@ class Context:
             self.path: str = os.path.abspath(pathStr)
             log.debug('Starting cpro in \'' + self.path + '\'')
         except:
-            raise  # TODO
+            Errors.NotInitialized(self.path)
 
         try:
             self.settings: Settings.SettingsFile = Settings.SettingsFile(
                 os.path.join(self.path, '.cpro.json'))
         except:
-            raise  # TODO
+            Errors.NotInitialized(self.path)
 
         self.output: OutputManager.OutputManager = OutputManager.OutputManager()
         self.reporter: ProgressReporter.ProgressReporter = ProgressReporter.ProgressReporter(
