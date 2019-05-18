@@ -31,9 +31,14 @@ class HeaderComment(Operations.CommentOperation):
 
         for line in self.context.settings.header.template:
             if line == '${AUTHOR}':
+                n_authors: int = 0
                 for author in self.file.authors:
                     header_block.append(
                         self._crate_doxy_comment('@author', repr(author), continued=continued_comment))
+                    n_authors = n_authors + 1
+                if n_authors == 0:
+                    header_block.append(
+                        self._crate_doxy_comment('@author', '', continued=continued_comment))
             elif line == '${FILE}':
                 header_block.append(self._create_FILE_part(continued_comment))
             elif line == '${DATE}':
