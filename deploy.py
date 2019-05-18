@@ -2,6 +2,7 @@ import os
 import subprocess
 import datetime
 import shutil
+import sys
 
 
 def ensure_dir_exists(dir):
@@ -16,6 +17,14 @@ def main():
     with open("cpro/version.py", "w") as f:
         f.write("version=\"" + version +
                 " (built " + datetime.datetime.now().isoformat() + ")\"")
+
+    if '--version-only' in sys.argv:
+        exit(0)
+
+    mypy_result = subprocess.run(
+        ["mypy", "--config-file", "../config.mypy", "cpro.py"], cwd="./cpro/")
+    if not mypy_result.returncode == 0:
+        exit(mypy_result.returncode)
 
     subprocess.run(["pyinstaller", "cpro.py", "--clean", "-F"], cwd="./cpro/")
 

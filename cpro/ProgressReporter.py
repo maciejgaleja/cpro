@@ -1,7 +1,6 @@
 from typing import Dict, List
 import OutputManager
 from enum import Enum
-import emoji
 
 
 class CproStage(Enum):
