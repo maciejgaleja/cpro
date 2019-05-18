@@ -10,8 +10,6 @@ import Errors
 
 class Context:
     def __init__(self, pathStr: str) -> None:
-        # TODO: use settings
-        self.git_cmd: str = 'git'
         try:
             self.path: str = os.path.abspath(pathStr)
             log.debug('Starting cpro in \'' + self.path + '\'')
@@ -32,7 +30,8 @@ class Context:
         self.settings.write_to_file()
 
     def git(self, command: List[str]) -> str:
-        command_to_call = [self.git_cmd, '--no-pager', '-C', self.path]
+        command_to_call = [self.settings.main.git_executable,
+                           '--no-pager', '-C', self.path]
         command_to_call.extend(command)
         log.debug('Calling \'' + ' '.join(command_to_call))
         ret = subprocess.run(command_to_call, capture_output=True)
