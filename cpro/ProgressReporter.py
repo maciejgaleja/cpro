@@ -2,6 +2,8 @@ from typing import Dict, List
 import OutputManager
 from enum import Enum
 from FancyOutput import colors, signs
+import ansiescapes
+import sys
 
 
 class CproStage(Enum):
@@ -46,17 +48,23 @@ class ProgressReporter():
     def __init__(self, output_manager: OutputManager.OutputManager)->None:
         self.items: Dict[str, ReportItem] = {}
         self.output = output_manager
+        self._lines_written = 0
 
     def update(self, item: ReportItem)->None:
         self.items[item.name] = item
-        self.output.write(self.to_string())
+        self._write_to_console(self.to_string())
 
     def update_item(self, name: str, stage: CproStage, value: int)->None:
         self.items[name].stages[stage] = value
-        self.output.write(self.to_string())
+        self._write_to_console(self.to_string())
 
     def to_string(self)->str:
         ret: str = ''
         for item in self.items.values():
             ret = ret + str(item) + '\n'
         return ret
+
+    def _write_to_console(self, text: str) -> None:
+        sys.stdout.write(ansiescapes.eraseLines(self._lines_written + 2))
+        self.output.write(self.to_string())
+        self._lines_written = len(text.splitlines(keepends=True))
