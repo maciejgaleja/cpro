@@ -32,7 +32,7 @@ class File:
             os.stat(self.absolute_path)
 
         except:
-            raise  # TODO
+            raise
 
     def open(self)->None:
         try:
@@ -41,7 +41,7 @@ class File:
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
         except:
-            raise  # TODO
+            raise
 
         self.lines = self._read_lines()
 
