@@ -1,6 +1,7 @@
 from typing import Dict, List
 import OutputManager
 from enum import Enum
+import emoji
 
 
 class CproStage(Enum):
@@ -9,6 +10,7 @@ class CproStage(Enum):
     INCLUDE = 2
     FOOTER = 100
     CLANG = 200
+    FILE_MODIFIED = 300
 
 
 class ReportItem:
@@ -18,13 +20,22 @@ class ReportItem:
                                              CproStage.HEADER: 0,
                                              CproStage.INCLUDE: 0,
                                              CproStage.FOOTER: 0,
-                                             CproStage.CLANG: 0}
+                                             CproStage.CLANG: 0,
+                                             CproStage.FILE_MODIFIED: 0}
         self.file_modified: bool = False
 
     def __str__(self)->str:
         ret: str = self.name.ljust(70)
-        for stage in self.stages.values():
-            ret = ret + str(stage).ljust(4)
+        for stage in self.stages.keys():
+            if stage == CproStage.FILE_MODIFIED:
+                if self.stages[stage] == 1:
+                    ret = ret + '1'
+                elif self.stages[stage] == 0:
+                    ret = ret + '0'
+                else:
+                    ret = ret + 'X'
+            else:
+                ret = ret + str(self.stages[stage]).ljust(4)
         return ret
 
 
