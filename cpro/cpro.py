@@ -2,6 +2,7 @@ import Context
 import Operations.Operations
 import Operations.Header
 import Operations.Sections
+import Operations.ClangFormat
 import File
 import logging
 import Settings
@@ -47,12 +48,12 @@ def main() -> None:
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.INCLUDE, 1)
 
-        oper2 = Operations.Operations.FooterComment(ctx, file)
+        oper2 = Operations.Sections.FooterComment(ctx, file)
         oper2.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.FOOTER, 1)
 
-        oper3 = Operations.Operations.ClangFormatOperation(ctx, file)
+        oper3 = Operations.ClangFormat.ClangFormatOperation(ctx, file)
         oper3.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.CLANG, 1)

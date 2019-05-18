@@ -48,3 +48,24 @@ class PreIncludes(Operations.CommentOperation):
             # TODO: what if there are no includes in this file?
 
         self.file.write_lines(self.lines)
+
+
+class FooterComment(Operations.CommentOperation):
+    def __init__(self, context: Context.Context, file_object: File.File) -> None:
+        super().__init__(context, file_object)
+
+    def run(self)-> None:
+        comments = TextMatchers.join_results(
+            TextMatchers.match_comments(self.lines))
+        if len(self.lines) - 1 in comments.lines:
+            self._delete_lines([-1])
+        else:
+            pass
+
+        if not len(self.lines[-1]) == 0:
+            self.lines.append('')
+
+        for line in self.context.settings.footer.content:
+            self.lines.append(line)
+
+        self.file.write_lines(self.lines)

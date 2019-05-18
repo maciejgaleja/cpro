@@ -91,36 +91,3 @@ class CommentOperation(FileOperation):
                         break
         if not empty_line_present:
             self.lines.insert(line + 1, '')
-
-
-class FooterComment(CommentOperation):
-    def __init__(self, context: Context.Context, file_object: File.File) -> None:
-        super().__init__(context, file_object)
-
-    def run(self)-> None:
-        comments = TextMatchers.join_results(
-            TextMatchers.match_comments(self.lines))
-        if len(self.lines) - 1 in comments.lines:
-            self._delete_lines([-1])
-        else:
-            pass
-
-        if not len(self.lines[-1]) == 0:
-            self.lines.append('')
-
-        for line in self.context.settings.footer.content:
-            self.lines.append(line)
-
-        self.file.write_lines(self.lines)
-
-
-class ClangFormatOperation(FileOperation):
-    def __init__(self, context: Context.Context, file_object: File.File) -> None:
-        super().__init__(context, file_object)
-
-    def run(self) -> None:
-        input_str = self.context.settings.code.newline.join(self.lines)
-        formatted_string = self.context.clang_format(
-            ['-style=file'], stdin=input_str)
-        formatted_lines = formatted_string.splitlines()
-        self.file.write_lines(formatted_lines)
