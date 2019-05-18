@@ -1,5 +1,8 @@
 import Context
-import Operations
+import Operations.Operations
+import Operations.Header
+import Operations.Sections
+import Operations.ClangFormat
 import File
 import logging
 import Settings
@@ -35,22 +38,22 @@ def main() -> None:
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.OPEN, 1)
 
-        oper = Operations.HeaderComment(ctx, file)
+        oper = Operations.Header.HeaderComment(ctx, file)
         oper.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.HEADER, 1)
 
-        operInc = Operations.PreIncludes(ctx, file)
+        operInc = Operations.Sections.PreIncludes(ctx, file)
         operInc.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.INCLUDE, 1)
 
-        oper2 = Operations.FooterComment(ctx, file)
+        oper2 = Operations.Sections.FooterComment(ctx, file)
         oper2.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.FOOTER, 1)
 
-        oper3 = Operations.ClangFormatOperation(ctx, file)
+        oper3 = Operations.ClangFormat.ClangFormatOperation(ctx, file)
         oper3.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.CLANG, 1)
