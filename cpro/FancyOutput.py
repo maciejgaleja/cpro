@@ -23,6 +23,14 @@ colors.bright_cyan = lambda text: color(96, text)
 colors.bright_white = lambda text: color(97, text)
 
 
+signs = SimpleNamespace()
+signs.block_solid = '\u2588'
+signs.check_box = '\u2611'
+signs.check_box_heavy = '\u2705'
+signs.check = '\u2713'
+signs.check_heavy = '\u2714'
+
+
 def init() ->None:
     if sys.platform == "win32":
         os.system('color')
@@ -37,3 +45,9 @@ def color(code: int, text: str = '', restoreNeutral: bool = True)->str:
     except:
         pass
     return ret
+
+
+if __name__ == "__main__":
+    print(repr(signs))
+#     for sign in signs:
+    # print(repr(sign))
