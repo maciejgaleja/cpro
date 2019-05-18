@@ -4,3 +4,4 @@ services:
     build: .
     volumes:
       - .:/usr/src/cpro
+    user: 1000:1000
