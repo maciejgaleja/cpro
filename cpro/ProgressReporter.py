@@ -1,6 +1,7 @@
 from typing import Dict, List
 import OutputManager
 from enum import Enum
+from FancyOutput import colors
 
 
 class CproStage(Enum):
@@ -28,13 +29,16 @@ class ReportItem:
         for stage in self.stages.keys():
             if stage == CproStage.FILE_MODIFIED:
                 if self.stages[stage] == 1:
-                    ret = ret + '1'
+                    ret = ret + colors.green('X')
                 elif self.stages[stage] == 0:
-                    ret = ret + '0'
+                    ret = ret + colors.black('X')
                 else:
-                    ret = ret + 'X'
+                    ret = ret + colors.white('X')
             else:
-                ret = ret + str(self.stages[stage]).ljust(4)
+                if self.stages[stage] == 0:
+                    ret = ret + colors.black('X'.ljust(4))
+                else:
+                    ret = ret + colors.green('X'.ljust(4))
         return ret
 
 

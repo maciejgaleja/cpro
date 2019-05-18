@@ -13,6 +13,7 @@ import version
 import ProgressReporter
 import FileFinder
 import Errors
+import FancyOutput
 
 
 def print_version() -> None:
@@ -20,6 +21,7 @@ def print_version() -> None:
 
 
 def main() -> None:
+    FancyOutput.init()
     try:
         print_version()
         root_path = '.'
