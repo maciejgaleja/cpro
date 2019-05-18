@@ -49,8 +49,11 @@ class Context:
         log.debug('Calling \'' + ' '.join(command))
         ret = subprocess.run(
             command, capture_output=True, input=input_bytes)
+        return_str: str = ret.stdout.decode('utf-8')
         if not (ret.returncode == 0):
             log.error(' '.join(command) +
                       ' command returned non-zero return status.\n' + str(ret))
-            raise Exception()
-        return ret.stdout.decode('utf-8')
+            err_str: str = ret.stderr.decode('utf-8')
+            raise Errors.CommandFailed(
+                ' '.join(command), ret.returncode, return_str, err_str)
+        return return_str
