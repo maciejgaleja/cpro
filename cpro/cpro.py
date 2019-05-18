@@ -1,6 +1,7 @@
 import Context
 import Operations.Operations
 import Operations.Header
+import Operations.Sections
 import File
 import logging
 import Settings
@@ -41,7 +42,7 @@ def main() -> None:
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.HEADER, 1)
 
-        operInc = Operations.Operations.PreIncludes(ctx, file)
+        operInc = Operations.Sections.PreIncludes(ctx, file)
         operInc.run()
         ctx.reporter.update_item(
             file.relative_path, ProgressReporter.CproStage.INCLUDE, 1)
