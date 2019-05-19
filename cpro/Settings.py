@@ -87,7 +87,7 @@ class SettingsFile(HardcodedSettings):
                 setattr(getattr(self, key), namespace_key,
                         json_obj[key][namespace_key])
 
-    def write_to_file(self)->None:
+    def write_to_file(self) -> None:
         json_str: str = json.dumps(self.as_dict(), indent=4, sort_keys=True)
         with open(self._filename, 'w') as file:
             file.write(json_str)

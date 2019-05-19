@@ -2,7 +2,7 @@ from typing import Dict, List
 import OutputManager
 from enum import Enum
 from FancyOutput import colors, signs
-import ansiescapes
+import ansiescapes  # type: ignore
 import sys
 
 
@@ -16,7 +16,7 @@ class CproStage(Enum):
 
 
 class ReportItem:
-    def __init__(self, name: str)->None:
+    def __init__(self, name: str) -> None:
         self.name: str = name
         self.stages: Dict[CproStage, int] = {CproStage.OPEN: 0,
                                              CproStage.HEADER: 0,
@@ -26,7 +26,7 @@ class ReportItem:
                                              CproStage.FILE_MODIFIED: 0}
         self.file_modified: bool = False
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         ret: str = self.name.ljust(70)
         for stage in self.stages.keys():
             if stage == CproStage.FILE_MODIFIED:
@@ -45,20 +45,20 @@ class ReportItem:
 
 
 class ProgressReporter():
-    def __init__(self, output_manager: OutputManager.OutputManager)->None:
+    def __init__(self, output_manager: OutputManager.OutputManager) -> None:
         self.items: Dict[str, ReportItem] = {}
         self.output = output_manager
         self._lines_written = 0
 
-    def update(self, item: ReportItem)->None:
+    def update(self, item: ReportItem) -> None:
         self.items[item.name] = item
         self._write_to_console(self.to_string())
 
-    def update_item(self, name: str, stage: CproStage, value: int)->None:
+    def update_item(self, name: str, stage: CproStage, value: int) -> None:
         self.items[name].stages[stage] = value
         self._write_to_console(self.to_string())
 
-    def to_string(self)->str:
+    def to_string(self) -> str:
         ret: str = ''
         for item in self.items.values():
             ret = ret + str(item) + '\n'

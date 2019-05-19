@@ -34,7 +34,7 @@ class File:
         except:
             raise
 
-    def open(self)->None:
+    def open(self) -> None:
         try:
             blame_str = self.context.git(
                 ['blame', self.absolute_path, '--porcelain'])
@@ -58,10 +58,10 @@ class File:
 
         return data
 
-    def write_lines(self, lines: List[str]) ->None:
+    def write_lines(self, lines: List[str]) -> None:
         self.lines = lines
 
-    def write_to_disk(self)->bool:
+    def write_to_disk(self) -> bool:
         ret: bool = False
         current_contents = self._read_lines()
         if not self.lines == current_contents:
@@ -74,7 +74,7 @@ class File:
             ret = False
         return ret
 
-    def _read_authors(self, blame_str: str)->List[Author]:
+    def _read_authors(self, blame_str: str) -> List[Author]:
         lines = blame_str.split('\n')
         all_authors = []
         line_number = 0

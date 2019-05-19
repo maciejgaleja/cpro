@@ -10,7 +10,7 @@ class MatchResult:
         return len(self.lines) > 0
 
 
-def join_results(results: List[MatchResult])->MatchResult:
+def join_results(results: List[MatchResult]) -> MatchResult:
     ret = MatchResult()
     for res in results:
         ret.lines.extend(res.lines)

@@ -31,12 +31,12 @@ signs.check = '\u2713'
 signs.check_heavy = '\u2714'
 
 
-def init() ->None:
+def init() -> None:
     if sys.platform == "win32":
         os.system('color')
 
 
-def color(code: int, text: str = '', restoreNeutral: bool = True)->str:
+def color(code: int, text: str = '', restoreNeutral: bool = True) -> str:
     ret: str = text
     try:
         ret = '\033[' + str(code) + 'm' + text
