@@ -1,5 +1,5 @@
 import Context
-import Operations.Operations
+from Operations.Operations import OperationResult as OperationResult
 import Operations.Header
 import Operations.Sections
 import Operations.ClangFormat
@@ -45,41 +45,50 @@ def main() -> None:
             file.open()
             reporter.update_item(
                 file.relative_path, ProgressReporter.CproStage.OPEN,
-                Operations.Operations.OperationResult.OK)
+                OperationResult.OK)
 
-            oper = Operations.Header.HeaderComment(ctx, file)
-            oper.run()
+            result = OperationResult.SKIPPED
+            if ctx.settings.operations.pre_includes:
+                operHeader = Operations.Header.HeaderComment(
+                    ctx, file)
+                operHeader.run()
+                result = OperationResult.OK
             reporter.update_item(
                 file.relative_path, ProgressReporter.CproStage.HEADER,
-                Operations.Operations.OperationResult.OK)
+                result)
 
+            result = OperationResult.SKIPPED
             if ctx.settings.operations.pre_includes:
                 operInc = Operations.Sections.PreIncludes(ctx, file)
                 operInc.run()
-                reporter.update_item(
-                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
-                    Operations.Operations.OperationResult.OK)
-            else:
-                reporter.update_item(
-                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
-                    Operations.Operations.OperationResult.SKIPPED)
+                result = OperationResult.OK
+            reporter.update_item(
+                file.relative_path, ProgressReporter.CproStage.INCLUDE,
+                result)
 
-            oper2 = Operations.Sections.FooterComment(ctx, file)
-            oper2.run()
+            result = OperationResult.SKIPPED
+            if ctx.settings.operations.pre_includes:
+                operFooter = Operations.Sections.FooterComment(ctx, file)
+                operFooter.run()
+                result = OperationResult.OK
             reporter.update_item(
                 file.relative_path, ProgressReporter.CproStage.FOOTER,
-                Operations.Operations.OperationResult.OK)
+                result)
 
-            oper3 = Operations.ClangFormat.ClangFormatOperation(ctx, file)
-            oper3.run()
+            result = OperationResult.SKIPPED
+            if ctx.settings.operations.pre_includes:
+                operClang = Operations.ClangFormat.ClangFormatOperation(
+                    ctx, file)
+                operClang.run()
+                result = OperationResult.OK
             reporter.update_item(
                 file.relative_path, ProgressReporter.CproStage.CLANG,
-                Operations.Operations.OperationResult.OK)
+                result)
 
             file_changed = file.write_to_disk()
             reporter.update_item(
                 file.relative_path, ProgressReporter.CproStage.FILE_WRITE,
-                Operations.Operations.OperationResult.OK)
+                OperationResult.OK)
             reporter.update_file_status(
                 file.relative_path, file_changed)
 

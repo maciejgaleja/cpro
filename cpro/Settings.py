@@ -27,7 +27,7 @@ class HardcodedSettings(SettingsBase):
         self.main.clang_format_executable = 'clang-format'
 
         self.operations = SimpleNamespace()
-        self.operations.foramt_header = False
+        self.operations.format_header = False
         self.operations.clang_format = False
         self.operations.pre_includes = False
 
