@@ -48,7 +48,7 @@ def main() -> None:
                 OperationResult.OK)
 
             result = OperationResult.SKIPPED
-            if ctx.settings.operations.pre_includes:
+            if ctx.settings.operations.format_header:
                 operHeader = Operations.Header.HeaderComment(
                     ctx, file)
                 operHeader.run()
@@ -67,7 +67,7 @@ def main() -> None:
                 result)
 
             result = OperationResult.SKIPPED
-            if ctx.settings.operations.pre_includes:
+            if ctx.settings.operations.format_footer:
                 operFooter = Operations.Sections.FooterComment(ctx, file)
                 operFooter.run()
                 result = OperationResult.OK
@@ -76,7 +76,7 @@ def main() -> None:
                 result)
 
             result = OperationResult.SKIPPED
-            if ctx.settings.operations.pre_includes:
+            if ctx.settings.operations.clang_format:
                 operClang = Operations.ClangFormat.ClangFormatOperation(
                     ctx, file)
                 operClang.run()

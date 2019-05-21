@@ -33,17 +33,21 @@ class ReportItem:
         ret: str = self.name.ljust(70)
         for stage in self.stages.keys():
             if stage == CproStage.FILE_WRITE:
-                if self.stages[stage] == 1:
+                if self.file_modified:
                     ret = ret + colors.green(signs.check_heavy)
-                elif self.stages[stage] == 0:
-                    ret = ret + colors.white('-')
                 else:
                     ret = ret + colors.white(signs.check_heavy)
             else:
-                if self.stages[stage] == 0:
+                if self.stages[stage] == OperationResult.PENDING:
                     ret = ret + colors.white('-'.ljust(4))
+                elif self.stages[stage] == OperationResult.SKIPPED:
+                    ret = ret + \
+                        colors.green(signs.arrow_triangle_right.ljust(4))
+                elif self.stages[stage] == OperationResult.OK:
+                    ret = ret + \
+                        colors.green(signs.check_heavy.ljust(4))
                 else:
-                    ret = ret + colors.green(signs.check_heavy.ljust(4))
+                    ret = ret + colors.red('x'.ljust(4))
         return ret
 
 
@@ -63,6 +67,7 @@ class ProgressReporter():
 
     def update_file_status(self, name: str, modified: bool) -> None:
         self.items[name].file_modified = modified
+        self._write_to_console(self.to_string())
 
     def to_string(self) -> str:
         ret: str = ''

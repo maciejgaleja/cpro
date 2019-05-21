@@ -25,10 +25,14 @@ colors.bright_white = lambda text: color(97, text)
 
 signs = SimpleNamespace()
 signs.block_solid = '\u2588'
+
 signs.check_box = '\u2611'
 signs.check_box_heavy = '\u2705'
 signs.check = '\u2713'
 signs.check_heavy = '\u2714'
+
+signs.arrow_double_colored_right = '\u23e9'
+signs.arrow_triangle_right = '\u25ba'
 
 
 def init() -> None:

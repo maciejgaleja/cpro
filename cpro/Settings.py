@@ -28,6 +28,7 @@ class HardcodedSettings(SettingsBase):
 
         self.operations = SimpleNamespace()
         self.operations.format_header = False
+        self.operations.format_footer = False
         self.operations.clang_format = False
         self.operations.pre_includes = False
 
