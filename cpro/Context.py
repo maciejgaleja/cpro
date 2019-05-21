@@ -19,10 +19,13 @@ class Context:
             self.settings: Settings.SettingsFile = Settings.SettingsFile(
                 os.path.join(self.path, '.cpro.json'))
         except:
-            Errors.NotInitialized(self.path)
+            raise Errors.NotInitialized(self.path)
 
     def __del__(self) -> None:
-        self.settings.write_to_file()
+        try:
+            self.settings.write_to_file()
+        except:
+            pass
 
     def git(self, command: List[str]) -> str:
         command_to_call = [self.settings.main.git_executable,

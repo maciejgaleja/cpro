@@ -76,6 +76,7 @@ class ProgressReporter():
         return ret
 
     def _write_to_console(self, text: str) -> None:
-        sys.stdout.write(ansiescapes.eraseLines(self._lines_written + 2))
+        pass
+        sys.stdout.write(ansiescapes.eraseLines(self._lines_written))
         self.output.write(self.to_string())
-        self._lines_written = len(text.splitlines(keepends=True))
+        self._lines_written = len(text.splitlines(keepends=True)) + 2

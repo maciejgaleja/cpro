@@ -71,11 +71,10 @@ class SettingsFile(HardcodedSettings):
         super().__init__()
         self._filename: str = filename
         json_obj: Dict[str, Any] = {}
-        try:
-            with open(self._filename, 'r') as file:
-                json_obj = json.load(file)
-        except:
-            json_obj = {}
+
+        with open(self._filename, 'r') as file:
+            json_obj = json.load(file)
+
         for key in json_obj:
             try:
                 nmspc: SimpleNamespace = getattr(self, key)

@@ -6,7 +6,8 @@ class CproException(Exception):
 
 class NotInitialized(CproException):
     def __init__(self, message: str) -> None:
-        full_message = 'Not a cpro project (' + message + ')'
+        full_message = 'Not a cpro project (' + message + \
+            ')\nTo initialize project, use\n\n    cpro init\n'
         super().__init__(full_message)
 
 

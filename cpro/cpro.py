@@ -22,78 +22,84 @@ def print_version() -> None:
 
 
 def main() -> None:
+    print_version()
     FancyOutput.init()
-    try:
-        print_version()
-        root_path = '.'
 
-        ctx = Context.Context(root_path)
-        outputManager = OutputManager.OutputManager()
-        reporter = ProgressReporter.ProgressReporter(outputManager)
+    if len(sys.argv) == 1:
+        try:
+            root_path = '.'
 
-        fileFinder: FileFinder.FileFinder = FileFinder.FileFinder(ctx)
-        filenames: List[str] = fileFinder.get_file_list()
+            ctx = Context.Context(root_path)
+            outputManager = OutputManager.OutputManager()
+            reporter = ProgressReporter.ProgressReporter(outputManager)
 
-        files: List[File.File] = []
-        for filename in filenames:
-            file = File.File(filename, ctx)
-            files.append(file)
-            reporter.update(
-                ProgressReporter.ReportItem(file.relative_path))
+            fileFinder: FileFinder.FileFinder = FileFinder.FileFinder(ctx)
+            filenames: List[str] = fileFinder.get_file_list()
 
-        for file in files:
-            file.open()
-            reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.OPEN,
-                OperationResult.OK)
+            files: List[File.File] = []
+            for filename in filenames:
+                file = File.File(filename, ctx)
+                files.append(file)
+                reporter.update(
+                    ProgressReporter.ReportItem(file.relative_path))
 
-            result = OperationResult.SKIPPED
-            if ctx.settings.operations.format_header:
-                operHeader = Operations.Header.HeaderComment(
-                    ctx, file)
-                operHeader.run()
-                result = OperationResult.OK
-            reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.HEADER,
-                result)
+            for file in files:
+                file.open()
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.OPEN,
+                    OperationResult.OK)
 
-            result = OperationResult.SKIPPED
-            if ctx.settings.operations.pre_includes:
-                operInc = Operations.Sections.PreIncludes(ctx, file)
-                operInc.run()
-                result = OperationResult.OK
-            reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.INCLUDE,
-                result)
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.format_header:
+                    operHeader = Operations.Header.HeaderComment(
+                        ctx, file)
+                    operHeader.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.HEADER,
+                    result)
 
-            result = OperationResult.SKIPPED
-            if ctx.settings.operations.format_footer:
-                operFooter = Operations.Sections.FooterComment(ctx, file)
-                operFooter.run()
-                result = OperationResult.OK
-            reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.FOOTER,
-                result)
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.pre_includes:
+                    operInc = Operations.Sections.PreIncludes(ctx, file)
+                    operInc.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
+                    result)
 
-            result = OperationResult.SKIPPED
-            if ctx.settings.operations.clang_format:
-                operClang = Operations.ClangFormat.ClangFormatOperation(
-                    ctx, file)
-                operClang.run()
-                result = OperationResult.OK
-            reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.CLANG,
-                result)
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.format_footer:
+                    operFooter = Operations.Sections.FooterComment(ctx, file)
+                    operFooter.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.FOOTER,
+                    result)
 
-            file_changed = file.write_to_disk()
-            reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.FILE_WRITE,
-                OperationResult.OK)
-            reporter.update_file_status(
-                file.relative_path, file_changed)
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.clang_format:
+                    operClang = Operations.ClangFormat.ClangFormatOperation(
+                        ctx, file)
+                    operClang.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.CLANG,
+                    result)
 
-    except Errors.CproException as e:
-        print(' '. join(e.args))
+                file_changed = file.write_to_disk()
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.FILE_WRITE,
+                    OperationResult.OK)
+                reporter.update_file_status(
+                    file.relative_path, file_changed)
+
+        except Errors.CproException as e:
+            print(str(e))
+    elif len(sys.argv) == 2 and sys.argv[1] == 'init':
+        f = open('./.cpro.json', 'a')
+        f.write('{ }')
+        f.close()
 
 
 if __name__ == "__main__":
