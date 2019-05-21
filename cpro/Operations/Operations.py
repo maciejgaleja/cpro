@@ -4,13 +4,21 @@ import TextMatchers
 import logging as log
 from typing import List
 import os
+from enum import Enum
+
+
+class OperationResult(Enum):
+    ERROR = -1
+    OK = 0
+    PENDING = 1
+    SKIPPED = 2
 
 
 class Operation:
     def __init__(self, context: Context.Context) -> None:
         self.context: Context.Context = context
 
-    def run(self)->None:
+    def run(self) -> None:
         raise NotImplementedError
 
 
@@ -27,7 +35,7 @@ class FileOperation(Operation):
             del self.lines[i - n_deleted]
             n_deleted = n_deleted + 1
 
-    def _insert_before(self, base_line: int, lines: List[str])->None:
+    def _insert_before(self, base_line: int, lines: List[str]) -> None:
         i: int = base_line
         for line in lines:
             self.lines.insert(i, line)
@@ -38,7 +46,7 @@ class CommentOperation(FileOperation):
     def __init__(self, context: Context.Context, file_object: File.File) -> None:
         super().__init__(context, file_object)
 
-    def _create_comment(self, text: str, continued: bool = False, solid: bool = False)->str:
+    def _create_comment(self, text: str, continued: bool = False, solid: bool = False) -> str:
         if continued:
             l_begin = self.context.settings.comment.continued_begin
             l_end = self.context.settings.comment.continued_end
@@ -59,7 +67,7 @@ class CommentOperation(FileOperation):
             ret = ret + l_end
         return ret
 
-    def _crate_doxy_comment(self, key: str, value: str, continued: bool = False)->str:
+    def _crate_doxy_comment(self, key: str, value: str, continued: bool = False) -> str:
         if(self.context.settings.comment.doxy_is_just_right):
             text = (
                 key+' ').rjust(self.context.settings.comment.doxy_just_width) + value

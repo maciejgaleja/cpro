@@ -14,6 +14,7 @@ import ProgressReporter
 import FileFinder
 import Errors
 import FancyOutput
+import OutputManager
 
 
 def print_version() -> None:
@@ -27,6 +28,8 @@ def main() -> None:
         root_path = '.'
 
         ctx = Context.Context(root_path)
+        outputManager = OutputManager.OutputManager()
+        reporter = ProgressReporter.ProgressReporter(outputManager)
 
         fileFinder: FileFinder.FileFinder = FileFinder.FileFinder(ctx)
         filenames: List[str] = fileFinder.get_file_list()
@@ -35,42 +38,50 @@ def main() -> None:
         for filename in filenames:
             file = File.File(filename, ctx)
             files.append(file)
-            ctx.reporter.update(
+            reporter.update(
                 ProgressReporter.ReportItem(file.relative_path))
 
         for file in files:
             file.open()
-            ctx.reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.OPEN, 1)
+            reporter.update_item(
+                file.relative_path, ProgressReporter.CproStage.OPEN,
+                Operations.Operations.OperationResult.OK)
 
             oper = Operations.Header.HeaderComment(ctx, file)
             oper.run()
-            ctx.reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.HEADER, 1)
+            reporter.update_item(
+                file.relative_path, ProgressReporter.CproStage.HEADER,
+                Operations.Operations.OperationResult.OK)
 
-            operInc = Operations.Sections.PreIncludes(ctx, file)
-            operInc.run()
-            ctx.reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.INCLUDE, 1)
+            if ctx.settings.operations.pre_includes:
+                operInc = Operations.Sections.PreIncludes(ctx, file)
+                operInc.run()
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
+                    Operations.Operations.OperationResult.OK)
+            else:
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
+                    Operations.Operations.OperationResult.SKIPPED)
 
             oper2 = Operations.Sections.FooterComment(ctx, file)
             oper2.run()
-            ctx.reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.FOOTER, 1)
+            reporter.update_item(
+                file.relative_path, ProgressReporter.CproStage.FOOTER,
+                Operations.Operations.OperationResult.OK)
 
             oper3 = Operations.ClangFormat.ClangFormatOperation(ctx, file)
             oper3.run()
-            ctx.reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.CLANG, 1)
+            reporter.update_item(
+                file.relative_path, ProgressReporter.CproStage.CLANG,
+                Operations.Operations.OperationResult.OK)
 
             file_changed = file.write_to_disk()
-            file_status = 0
-            if file_changed:
-                file_status = 1
-            else:
-                file_status = -1
-            ctx.reporter.update_item(
-                file.relative_path, ProgressReporter.CproStage.FILE_MODIFIED, file_status)
+            reporter.update_item(
+                file.relative_path, ProgressReporter.CproStage.FILE_WRITE,
+                Operations.Operations.OperationResult.OK)
+            reporter.update_file_status(
+                file.relative_path, file_changed)
 
     except Errors.CproException as e:
         print(' '. join(e.args))
