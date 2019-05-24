@@ -36,13 +36,15 @@ class File:
             raise
 
     def open(self) -> None:
+        self.authors: List[Author] = []
+        self.date: datetime.date = datetime.date.today()
         try:
             blame_str = self.context.git(
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
         except:
-            raise
+            pass
 
         self.lines = self._read_lines()
 
