@@ -44,14 +44,15 @@ class Context:
         if not len(stdin) == 0:
             input_bytes = bytes(stdin, 'utf-8')
 
-        log.debug('Calling \'' + ' '.join(command))
-        ret = subprocess.run(
-            command, capture_output=True, input=input_bytes)
-        return_str: str = ret.stdout.decode('utf-8')
-        if not (ret.returncode == 0):
-            log.error(' '.join(command) +
-                      ' command returned non-zero return status.\n' + str(ret))
+        try:
+            log.debug('Calling \'' + ' '.join(command))
+            ret = subprocess.run(
+                command, capture_output=True, input=input_bytes)
+            return_str: str = ret.stdout.decode('utf-8')
             err_str: str = ret.stderr.decode('utf-8')
+            if not (ret.returncode == 0):
+                raise Exception()
+        except:
             raise Errors.CommandFailed(
                 ' '.join(command), ret.returncode, return_str, err_str)
         return return_str
