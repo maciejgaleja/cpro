@@ -100,6 +100,7 @@ def main() -> None:
         f = open('./.cpro.json', 'a')
         f.write('{ }')
         f.close()
+        context = Context.Context('.')
 
 
 if __name__ == "__main__":
