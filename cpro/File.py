@@ -7,16 +7,20 @@ import Context
 
 
 class Author:
-    def __init__(self) -> None:
+    def __init__(self, context: Context.Context) -> None:
         self.name: str = ''
         self.email: str = ''
+        self.context: Context.Context = context
 
     def __hash__(self) -> int:
         ret = (self.name + self.email).__hash__()
         return ret
 
     def __str__(self) -> str:
-        return self.name + ' <' + self.email + '>'
+        ret: str = self.name
+        if self.context.settings.metadata.authors_include_email:
+            ret = ret + ' <' + self.email + '>'
+        return ret
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -83,7 +87,7 @@ class File:
         line_number = 0
         for line in lines:
             if (line.startswith('author '))and (not 'author Not Committed Yet' in line):
-                author = Author()
+                author = Author(self.context)
                 author.name = lines[line_number].replace('author', '').strip()
                 author.email = lines[line_number +
                                      1].replace('author-mail', '').replace('<', '').replace('>', '').strip()

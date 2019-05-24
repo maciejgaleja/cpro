@@ -39,6 +39,7 @@ class HardcodedSettings(SettingsBase):
 
         self.metadata = SimpleNamespace()
         self.metadata.authors_exclude = ['']
+        self.metadata.authors_include_email = True
 
         self.code = SimpleNamespace()
         self.code.line_width = 80
