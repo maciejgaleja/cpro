@@ -10,7 +10,7 @@ class HeaderComment(Operations.CommentOperation):
     def __init__(self, context: Context.Context, file_object: File.File) -> None:
         super().__init__(context, file_object)
 
-    def run(self)-> None:
+    def run(self) -> None:
         match_result = TextMatchers.match_comments(self.lines)
 
         if (len(match_result) > 0):
@@ -25,7 +25,7 @@ class HeaderComment(Operations.CommentOperation):
 
         self.file.write_lines(self.lines)
 
-    def _create_header_block(self)->List[str]:
+    def _create_header_block(self) -> List[str]:
         header_block = []
         continued_comment: bool = self.context.settings.header.is_block_comment
 
@@ -51,19 +51,22 @@ class HeaderComment(Operations.CommentOperation):
                 header_block.append(line)
         return header_block
 
-    def _create_FILE_part(self, continued: bool = False)->str:
+    def _create_FILE_part(self, continued: bool = False) -> str:
         ret = ''
         file_path = self.file.relative_path
-        for path_spec in self.context.settings.header.file_base_path:
-            potential_part_to_remove = os.path.join(*path_spec)
-            if(file_path.startswith(potential_part_to_remove)) and len(potential_part_to_remove) > 0:
-                file_path = file_path[len(potential_part_to_remove)+1:]
-                break
+        if self.context.settings.header.filename_only:
+            file_path = os.path.basename(file_path)
+        else:
+            for path_spec in self.context.settings.header.file_base_path:
+                potential_part_to_remove = os.path.join(*path_spec)
+                if(file_path.startswith(potential_part_to_remove)) and len(potential_part_to_remove) > 0:
+                    file_path = file_path[len(potential_part_to_remove)+1:]
+                    break
         ret = self._crate_doxy_comment(
             '@file', file_path, continued=continued)
         return ret
 
-    def _verify_header(self, header: str)->bool:
+    def _verify_header(self, header: str) -> bool:
         ret = True
         ret = ret and ('@file' in header)
         ret = ret and ('@date' in header)
