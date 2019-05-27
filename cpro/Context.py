@@ -39,6 +39,19 @@ class Context:
         command_to_call.extend(command)
         return self._call_command(command_to_call, stdin)
 
+    def get_filename_in_temp_dir(self, filename: str) -> str:
+        ret: str = self.path
+        common_path = os.path.commonpath(
+            [os.path.abspath(self.path), os.path.abspath(filename)])
+        path_difference = filename[len(common_path)+len(os.sep):]
+        ret = os.path.join(common_path, '.cpro', 'temp', path_difference)
+        dirname = os.path.dirname(ret)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        with open(ret, 'w') as file:
+            file.truncate()
+        return ret
+
     def _call_command(self, command: List[str], stdin: str = '') -> str:
         input_bytes: Any = None
         if not len(stdin) == 0:
