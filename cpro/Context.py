@@ -41,9 +41,10 @@ class Context:
 
     def get_filename_in_temp_dir(self, filename: str) -> str:
         ret: str = self.path
+        abspath = os.path.abspath(filename)
         common_path = os.path.commonpath(
-            [os.path.abspath(self.path), os.path.abspath(filename)])
-        path_difference = filename[len(common_path)+len(os.sep):]
+            [os.path.abspath(self.path), abspath])
+        path_difference = abspath[len(common_path)+len(os.sep):]
         ret = os.path.join(common_path, '.cpro', 'temp', path_difference)
         dirname = os.path.dirname(ret)
         if not os.path.exists(dirname):
