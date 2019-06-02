@@ -61,15 +61,6 @@ def main() -> None:
                     result)
 
                 result = OperationResult.SKIPPED
-                if ctx.settings.operations.pre_includes:
-                    operInc = Operations.Sections.PreIncludes(ctx, file)
-                    operInc.run()
-                    result = OperationResult.OK
-                reporter.update_item(
-                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
-                    result)
-
-                result = OperationResult.SKIPPED
                 if ctx.settings.operations.format_footer:
                     operFooter = Operations.Sections.FooterComment(ctx, file)
                     operFooter.run()
@@ -86,6 +77,16 @@ def main() -> None:
                     result = OperationResult.OK
                 reporter.update_item(
                     file.relative_path, ProgressReporter.CproStage.FOOTER,
+                    result)
+
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.sections:
+                    operSect = Operations.Sections.SectionCommentWorker(
+                        ctx, file)
+                    operSect.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
                     result)
 
                 result = OperationResult.SKIPPED

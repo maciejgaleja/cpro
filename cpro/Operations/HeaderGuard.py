@@ -19,31 +19,33 @@ class HeaderGuard(Operations.CommentOperation):
 
             token_found_in_file = self._find_token_in_file(
                 guard_ifndef, guard_define)
-            if not token_found_in_file == '':
-                self._remove_old_guard(
-                    token_found_in_file, lines_ifndef, lines_define, lines_endif)
 
-            token_to_insert = self._create_token()
-            print(token_to_insert)
+            if not token_found_in_file == self._create_token():
+                if not token_found_in_file == '':
+                    self._remove_old_guard(
+                        token_found_in_file, lines_ifndef, lines_define, lines_endif)
 
-            all_comments = TextMatchers.match_comments(self.lines)
-            comments_top: List[int] = []
-            comments_bottom: List[int] = []
-            try:
-                comments_top = all_comments[0].lines
-                if len(all_comments) > 1:
-                    comments_bottom = all_comments[-1].lines
-            except KeyError:
-                pass
+                token_to_insert = self._create_token()
+                print(token_to_insert)
 
-            lines_already_inserted = 0
-            block_top = self._create_top_block()
-            block_bottom = self._create_bottom_block()
-            self._insert_before(
-                comments_top[-1]+1, block_top)
-            lines_already_inserted += len(block_top)
-            self._insert_before(
-                comments_bottom[0]+lines_already_inserted, block_bottom)
+                all_comments = TextMatchers.match_comments(self.lines)
+                comments_top: List[int] = []
+                comments_bottom: List[int] = []
+                try:
+                    comments_top = all_comments[0].lines
+                    if len(all_comments) > 1:
+                        comments_bottom = all_comments[-1].lines
+                except KeyError:
+                    pass
+
+                lines_already_inserted = 0
+                block_top = self._create_top_block()
+                block_bottom = self._create_bottom_block()
+                self._insert_before(
+                    comments_top[-1]+1, block_top)
+                lines_already_inserted += len(block_top)
+                self._insert_before(
+                    comments_bottom[0]+lines_already_inserted, block_bottom)
 
     def _is_file_a_header(self) -> bool:
         extension = pathlib.Path(
