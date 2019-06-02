@@ -54,7 +54,7 @@ class FooterComment(Operations.CommentOperation):
     def __init__(self, context: Context.Context, file_object: File.File) -> None:
         super().__init__(context, file_object)
 
-    def run(self)-> None:
+    def run(self) -> None:
         comments = TextMatchers.join_results(
             TextMatchers.match_comments(self.lines))
         if len(self.lines) - 1 in comments.lines:

@@ -3,6 +3,7 @@ from Operations.Operations import OperationResult as OperationResult
 import Operations.Header
 import Operations.Sections
 import Operations.ClangFormat
+import Operations.HeaderGuard
 import File
 import logging
 import Settings
@@ -72,6 +73,16 @@ def main() -> None:
                 if ctx.settings.operations.format_footer:
                     operFooter = Operations.Sections.FooterComment(ctx, file)
                     operFooter.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.FOOTER,
+                    result)
+
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.header_guard:
+                    operHeaderGuard = Operations.HeaderGuard.HeaderGuard(
+                        ctx, file)
+                    operHeaderGuard.run()
                     result = OperationResult.OK
                 reporter.update_item(
                     file.relative_path, ProgressReporter.CproStage.FOOTER,

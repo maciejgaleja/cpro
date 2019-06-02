@@ -29,6 +29,7 @@ class HardcodedSettings(SettingsBase):
         self.operations = SimpleNamespace()
         self.operations.format_header = False
         self.operations.format_footer = False
+        self.operations.header_guard = False
         self.operations.clang_format = False
         self.operations.pre_includes = False
 
@@ -40,6 +41,15 @@ class HardcodedSettings(SettingsBase):
         self.metadata = SimpleNamespace()
         self.metadata.authors_exclude = ['']
         self.metadata.authors_include_email = True
+
+        self.header_guard = SimpleNamespace()
+        self.header_guard.prefix = ''
+        self.header_guard.suffix = ''
+        self.header_guard.path_separator = '__'
+        self.header_guard.extension_separator = '_'
+        self.header_guard.file_base_path = [['']]
+        self.header_guard.endif_comment_begin = '// '
+        self.header_guard.endif_comment_end = ''
 
         self.code = SimpleNamespace()
         self.code.line_width = 80
