@@ -52,8 +52,8 @@ class File:
 
             self._metadata: FileMetadata = self.context.metadata_base.get(
                 self.relative_path)
-            self.brief = self._metadata['brief']
-            additional_authors = self._metadata['additional_authors']
+            self.brief = self._metadata.brief
+            additional_authors = self._metadata.additional_authors
             for author in additional_authors:
                 author_object = Author(self.context)
                 author_object.name = author[0]
@@ -62,11 +62,12 @@ class File:
         except:
             pass
 
-        self.lines = self._read_lines()
+        self.lines = File.read_lines(self.absolute_path)
 
-    def _read_lines(self) -> List[str]:
+    @staticmethod
+    def read_lines(filename: str) -> List[str]:
         data: List[str] = []
-        with open(self.absolute_path, 'r', newline='') as f:
+        with open(filename, 'r', newline='') as f:
             data_str = f.read()
 
         data = data_str.splitlines()
@@ -82,7 +83,7 @@ class File:
 
     def write_to_disk(self) -> bool:
         ret: bool = False
-        current_contents = self._read_lines()
+        current_contents = File.read_lines(self.absolute_path)
         if not self.lines == current_contents:
             with open(self.absolute_path, 'w', newline='') as f:
                 for line in self.lines:
