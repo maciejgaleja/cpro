@@ -46,7 +46,7 @@ class HeaderComment(Operations.CommentOperation):
                     '@date', self.file.date.isoformat(), continued=continued_comment))
             elif line == '${BRIEF}':
                 header_block.append(self._crate_doxy_comment(
-                    '@brief', '', continued=continued_comment))
+                    '@brief', self.file.brief, continued=continued_comment))
             else:
                 header_block.append(line)
         return header_block

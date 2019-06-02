@@ -3,6 +3,7 @@ from typing import List
 import logging as log
 import datetime
 
+from FileMetadataBase import FileMetadata
 import Context
 
 
@@ -42,11 +43,22 @@ class File:
     def open(self) -> None:
         self.authors: List[Author] = []
         self.date: datetime.date = datetime.date.today()
+        self.brief = ''
         try:
             blame_str = self.context.git(
                 ['blame', self.absolute_path, '--porcelain'])
             self.authors: List[Author] = self._read_authors(blame_str)
             self.date: datetime.date = self._read_date(blame_str)
+
+            self._metadata: FileMetadata = self.context.metadata_base.get(
+                self.relative_path)
+            self.brief = self._metadata['brief']
+            additional_authors = self._metadata['additional_authors']
+            for author in additional_authors:
+                author_object = Author(self.context)
+                author_object.name = author[0]
+                author_object.email = author[1]
+                self.authors.append(author_object)
         except:
             pass
 

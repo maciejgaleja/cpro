@@ -5,6 +5,7 @@ import logging as log
 
 import Errors
 import Settings
+import FileMetadataBase
 
 
 class Context:
@@ -21,11 +22,15 @@ class Context:
         except:
             raise Errors.NotInitialized(self.path)
 
+        self.metadata_base = FileMetadataBase.FileMetadataBase(
+            os.path.join(self.path, '.cpro_metadata.json'))
+
     def __del__(self) -> None:
         try:
             self.settings.write_to_file()
+            self.metadata_base.write_to_file()
         except:
-            pass
+            raise
 
     def git(self, command: List[str]) -> str:
         command_to_call = [self.settings.main.git_executable,

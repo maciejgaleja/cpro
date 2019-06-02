@@ -97,9 +97,10 @@ def main() -> None:
         except Errors.CproException as e:
             print(str(e))
     elif len(sys.argv) == 2 and sys.argv[1] == 'init':
-        f = open('./.cpro.json', 'a')
-        f.write('{ }')
-        f.close()
+        if not os.path.isfile(filename):
+            f = open('./.cpro.json', 'w')
+            f.write('{ }')
+            f.close()
         context = Context.Context('.')
 
 
