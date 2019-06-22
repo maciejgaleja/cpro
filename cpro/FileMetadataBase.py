@@ -21,8 +21,6 @@ class FileMetadataBase:
         with open(filename, 'r') as file:
             self._json_obj = json.load(file)
 
-        print(repr(self._json_obj))
-
     def get(self, filename: str) -> FileMetadata:
         absolute_path: str = os.path.normpath(filename).replace('\\', '/')
         try:

@@ -26,7 +26,6 @@ class HeaderGuard(Operations.CommentOperation):
                         token_found_in_file, lines_ifndef, lines_define, lines_endif)
 
                 token_to_insert = self._create_token()
-                print(token_to_insert)
 
                 all_comments = TextMatchers.match_comments(self.lines)
                 comments_top: List[int] = []
@@ -120,5 +119,4 @@ class HeaderGuard(Operations.CommentOperation):
         path = path.replace('.', settings.extension_separator)
         path = path.upper()
         ret = settings.prefix + path + settings.suffix
-        print(ret)
         return ret

@@ -16,7 +16,6 @@ class SectionComment(Operations.CommentOperation):
         settings = self.context.settings.sections
 
         potential_lines = self._find_potential_lines()
-        print(potential_lines)
 
         if len(potential_lines) > 0:
             expected_comment_line_index = potential_lines[0] - 1
