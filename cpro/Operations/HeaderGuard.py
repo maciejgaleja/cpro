@@ -31,9 +31,14 @@ class HeaderGuard(Operations.CommentOperation):
                 comments_top: List[int] = []
                 comments_bottom: List[int] = []
                 try:
-                    comments_top = all_comments[0].lines
+                    if len(all_comments) > 0:
+                        comments_top = all_comments[0].lines
+                    else:
+                        comments_top = [0]
                     if len(all_comments) > 1:
                         comments_bottom = all_comments[-1].lines
+                    else:
+                        comments_bottom = [0]
                 except KeyError:
                     pass
 
