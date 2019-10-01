@@ -68,7 +68,5 @@ class HeaderComment(Operations.CommentOperation):
 
     def _verify_header(self, header: str) -> bool:
         ret = True
-        ret = ret and ('@file' in header)
-        ret = ret and ('@date' in header)
-        ret = ret and ('@brief' in header)
+        # TODO
         return ret
