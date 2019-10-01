@@ -47,8 +47,8 @@ class File:
         try:
             blame_str = self.context.git(
                 ['blame', self.absolute_path, '--porcelain'])
-            self.authors: List[Author] = self._read_authors(blame_str)
-            self.date: datetime.date = self._read_date(blame_str)
+            self.authors = self._read_authors(blame_str)
+            self.date = self._read_date(blame_str)
 
             self._metadata: FileMetadata = self.context.metadata_base.get(
                 self.relative_path)
