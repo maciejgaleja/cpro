@@ -3,20 +3,25 @@ from typing import List
 import logging as log
 import datetime
 
+from FileMetadataBase import FileMetadata
 import Context
 
 
 class Author:
-    def __init__(self) -> None:
+    def __init__(self, context: Context.Context) -> None:
         self.name: str = ''
         self.email: str = ''
+        self.context: Context.Context = context
 
     def __hash__(self) -> int:
         ret = (self.name + self.email).__hash__()
         return ret
 
     def __str__(self) -> str:
-        return self.name + ' <' + self.email + '>'
+        ret: str = self.name
+        if self.context.settings.metadata.authors_include_email:
+            ret = ret + ' <' + self.email + '>'
+        return ret
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -36,19 +41,33 @@ class File:
             raise
 
     def open(self) -> None:
+        self.authors: List[Author] = []
+        self.date: datetime.date = datetime.date.today()
+        self.brief = ''
         try:
             blame_str = self.context.git(
                 ['blame', self.absolute_path, '--porcelain'])
-            self.authors: List[Author] = self._read_authors(blame_str)
-            self.date: datetime.date = self._read_date(blame_str)
+            self.authors = self._read_authors(blame_str)
+            self.date = self._read_date(blame_str)
+
+            self._metadata: FileMetadata = self.context.metadata_base.get(
+                self.relative_path)
+            self.brief = self._metadata.brief
+            additional_authors = self._metadata.additional_authors
+            for author in additional_authors:
+                author_object = Author(self.context)
+                author_object.name = author[0]
+                author_object.email = author[1]
+                self.authors.append(author_object)
         except:
-            raise
+            pass
 
-        self.lines = self._read_lines()
+        self.lines = File.read_lines(self.absolute_path)
 
-    def _read_lines(self) -> List[str]:
+    @staticmethod
+    def read_lines(filename: str) -> List[str]:
         data: List[str] = []
-        with open(self.absolute_path, 'r', newline='') as f:
+        with open(filename, 'r', newline='') as f:
             data_str = f.read()
 
         data = data_str.splitlines()
@@ -64,7 +83,7 @@ class File:
 
     def write_to_disk(self) -> bool:
         ret: bool = False
-        current_contents = self._read_lines()
+        current_contents = File.read_lines(self.absolute_path)
         if not self.lines == current_contents:
             with open(self.absolute_path, 'w', newline='') as f:
                 for line in self.lines:
@@ -81,7 +100,7 @@ class File:
         line_number = 0
         for line in lines:
             if (line.startswith('author '))and (not 'author Not Committed Yet' in line):
-                author = Author()
+                author = Author(self.context)
                 author.name = lines[line_number].replace('author', '').strip()
                 author.email = lines[line_number +
                                      1].replace('author-mail', '').replace('<', '').replace('>', '').strip()

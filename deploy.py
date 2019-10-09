@@ -32,7 +32,10 @@ def main():
     deploy_dir_name = "_deploy/" + date_time_str
     ensure_dir_exists(deploy_dir_name)
 
-    shutil.copyfile("cpro/dist/cpro", deploy_dir_name + "/cpro")
+    if os.name == 'nt':
+        shutil.copyfile("cpro/dist/cpro.exe", deploy_dir_name + "/cpro.exe")
+    else:
+        shutil.copyfile("cpro/dist/cpro", deploy_dir_name + "/cpro")
 
     shutil.rmtree("cpro/build")
     shutil.rmtree("cpro/dist")

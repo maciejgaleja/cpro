@@ -5,6 +5,7 @@ import logging as log
 
 import Errors
 import Settings
+import FileMetadataBase
 
 
 class Context:
@@ -21,11 +22,15 @@ class Context:
         except:
             raise Errors.NotInitialized(self.path)
 
+        self.metadata_base = FileMetadataBase.FileMetadataBase(
+            os.path.join(self.path, '.cpro_metadata.json'))
+
     def __del__(self) -> None:
         try:
             self.settings.write_to_file()
+            self.metadata_base.write_to_file()
         except:
-            pass
+            raise
 
     def git(self, command: List[str]) -> str:
         command_to_call = [self.settings.main.git_executable,
@@ -38,6 +43,20 @@ class Context:
             self.settings.main.clang_format_executable]
         command_to_call.extend(command)
         return self._call_command(command_to_call, stdin)
+
+    def get_filename_in_temp_dir(self, filename: str) -> str:
+        ret: str = self.path
+        abspath = os.path.abspath(filename)
+        common_path = os.path.commonpath(
+            [os.path.abspath(self.path), abspath])
+        path_difference = abspath[len(common_path)+len(os.sep):]
+        ret = os.path.join(common_path, '.cpro', 'temp', path_difference)
+        dirname = os.path.dirname(ret)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        with open(ret, 'w') as file:
+            file.truncate()
+        return ret
 
     def _call_command(self, command: List[str], stdin: str = '') -> str:
         input_bytes: Any = None

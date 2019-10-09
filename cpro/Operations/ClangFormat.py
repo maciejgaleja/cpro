@@ -1,6 +1,7 @@
 from . import Operations
 import File
 import Context
+from typing import List
 
 
 class ClangFormatOperation(Operations.FileOperation):
@@ -9,7 +10,10 @@ class ClangFormatOperation(Operations.FileOperation):
 
     def run(self) -> None:
         input_str = self.context.settings.code.newline.join(self.lines)
-        formatted_string = self.context.clang_format(
-            ['-style=file'], stdin=input_str)
-        formatted_lines = formatted_string.splitlines()
+        temp_filename = self.context.get_filename_in_temp_dir('temp.txt')
+        with open(temp_filename, 'w') as file:
+            file.write(input_str)
+        self.context.clang_format(
+            ['-style=file', '-i', temp_filename])
+        formatted_lines: List[str] = File.File.read_lines(temp_filename)
         self.file.write_lines(formatted_lines)

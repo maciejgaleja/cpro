@@ -3,6 +3,7 @@ from Operations.Operations import OperationResult as OperationResult
 import Operations.Header
 import Operations.Sections
 import Operations.ClangFormat
+import Operations.HeaderGuard
 import File
 import logging
 import Settings
@@ -60,21 +61,32 @@ def main() -> None:
                     result)
 
                 result = OperationResult.SKIPPED
-                if ctx.settings.operations.pre_includes:
-                    operInc = Operations.Sections.PreIncludes(ctx, file)
-                    operInc.run()
-                    result = OperationResult.OK
-                reporter.update_item(
-                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
-                    result)
-
-                result = OperationResult.SKIPPED
                 if ctx.settings.operations.format_footer:
                     operFooter = Operations.Sections.FooterComment(ctx, file)
                     operFooter.run()
                     result = OperationResult.OK
                 reporter.update_item(
                     file.relative_path, ProgressReporter.CproStage.FOOTER,
+                    result)
+
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.header_guard:
+                    operHeaderGuard = Operations.HeaderGuard.HeaderGuard(
+                        ctx, file)
+                    operHeaderGuard.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.FOOTER,
+                    result)
+
+                result = OperationResult.SKIPPED
+                if ctx.settings.operations.sections:
+                    operSect = Operations.Sections.SectionCommentWorker(
+                        ctx, file)
+                    operSect.run()
+                    result = OperationResult.OK
+                reporter.update_item(
+                    file.relative_path, ProgressReporter.CproStage.INCLUDE,
                     result)
 
                 result = OperationResult.SKIPPED
@@ -97,9 +109,12 @@ def main() -> None:
         except Errors.CproException as e:
             print(str(e))
     elif len(sys.argv) == 2 and sys.argv[1] == 'init':
-        f = open('./.cpro.json', 'a')
-        f.write('{ }')
-        f.close()
+        filename = './.cpro.json'
+        if not os.path.isfile(filename):
+            f = open(filename, 'w')
+            f.write('{ }')
+            f.close()
+        context = Context.Context('.')
 
 
 if __name__ == "__main__":

@@ -12,6 +12,15 @@
             "args": [],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/tests/header-guard/"
+        },
+        {
+            "name": "Real project",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/cpro/cpro.py",
+            "args": [],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/../lotrame"
         }
     ]
 }
