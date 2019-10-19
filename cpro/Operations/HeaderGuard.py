@@ -42,14 +42,27 @@ class HeaderGuard(Operations.CommentOperation):
                 except KeyError:
                     pass
 
-                lines_already_inserted = 0
+                n_lines_already_inserted: int = 0
+
+                index_top: int = 0
+                if not comments_top[-1] == 0:
+                    index_top = comments_top[-1] + 1
+                else:
+                    index_top = 1
                 block_top = self._create_top_block()
+                self._insert_before(
+                    index_top, block_top)
+
+                n_lines_already_inserted += len(block_top)
+
+                index_bottom: int = 0
+                if not comments_bottom[0] == 0:
+                    index_top = comments_bottom[0] + n_lines_already_inserted
+                else:
+                    index_top = len(self.file.lines)
                 block_bottom = self._create_bottom_block()
                 self._insert_before(
-                    comments_top[-1]+1, block_top)
-                lines_already_inserted += len(block_top)
-                self._insert_before(
-                    comments_bottom[0]+lines_already_inserted, block_bottom)
+                    index_top, block_bottom)
 
     def _is_file_a_header(self) -> bool:
         extension = pathlib.Path(
