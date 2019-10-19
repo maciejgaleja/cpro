@@ -20,7 +20,7 @@ class Author:
     def __str__(self) -> str:
         ret: str = self.name
         if self.context.settings.metadata.authors_include_email:
-            ret = ret + ' <' + self.email + '>'
+            ret = ret + ' <' + self.email.replace("@", "[at]") + '>'
         return ret
 
     def __repr__(self) -> str:
