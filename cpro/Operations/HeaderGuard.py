@@ -121,6 +121,7 @@ class HeaderGuard(Operations.CommentOperation):
 
         path = path.replace('/', settings.path_separator)
         path = path.replace('\\', settings.path_separator)
+        path = path.replace('-', '_')
         path = path.replace('.', settings.extension_separator)
         path = path.upper()
         ret = settings.prefix + path + settings.suffix
