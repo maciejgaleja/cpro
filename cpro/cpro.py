@@ -89,6 +89,8 @@ def main() -> None:
                     file.relative_path, ProgressReporter.CproStage.INCLUDE,
                     result)
 
+                file_changed = file.write_to_disk()
+
                 result = OperationResult.SKIPPED
                 if ctx.settings.operations.clang_format:
                     operClang = Operations.ClangFormat.ClangFormatOperation(
@@ -99,7 +101,7 @@ def main() -> None:
                     file.relative_path, ProgressReporter.CproStage.CLANG,
                     result)
 
-                file_changed = file.write_to_disk()
+                file_changed = file_changed or file.write_to_disk()
                 reporter.update_item(
                     file.relative_path, ProgressReporter.CproStage.FILE_WRITE,
                     OperationResult.OK)

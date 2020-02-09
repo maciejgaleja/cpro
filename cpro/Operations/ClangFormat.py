@@ -9,11 +9,7 @@ class ClangFormatOperation(Operations.FileOperation):
         super().__init__(context, file_object)
 
     def run(self) -> None:
-        input_str = self.context.settings.code.newline.join(self.lines)
-        temp_filename = self.context.get_filename_in_temp_dir('temp.txt')
-        with open(temp_filename, 'w') as file:
-            file.write(input_str)
-        self.context.clang_format(
-            ['-style=file', '-i', temp_filename])
-        formatted_lines: List[str] = File.File.read_lines(temp_filename)
+        formatted_str = self.context.clang_format(
+            ['-style=file', self.file.absolute_path])
+        formatted_lines: List[str] = formatted_str.splitlines()
         self.file.write_lines(formatted_lines)
