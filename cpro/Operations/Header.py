@@ -64,6 +64,18 @@ class HeaderComment(Operations.CommentOperation):
                     break
         ret = self._crate_doxy_comment(
             '@file', file_path, continued=continued)
+        ret = self._ensure_comment_width_within_limit(ret)
+        return ret
+
+    def _ensure_comment_width_within_limit(self, line: str) -> str:
+        ret = line
+        if(len(line) > self.context.settings.code.line_width):
+            split_point = int(0.5 * self.context.settings.code.line_width)
+            beginning = line[0:split_point] + '...'
+            ending = line[split_point:]
+            while(len(beginning + ending) > self.context.settings.code.line_width):
+                ending = ending[1:]
+            ret = beginning + ending
         return ret
 
     def _verify_header(self, header: str) -> bool:

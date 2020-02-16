@@ -66,7 +66,7 @@ class Context:
         try:
             log.debug('Calling \'' + ' '.join(command))
             ret = subprocess.run(
-                command, capture_output=True, input=input_bytes)
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=input_bytes)
             return_str: str = ret.stdout.decode('utf-8')
             err_str: str = ret.stderr.decode('utf-8')
             if not (ret.returncode == 0):
