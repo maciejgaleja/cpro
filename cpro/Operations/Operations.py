@@ -65,6 +65,7 @@ class CommentOperation(FileOperation):
             ret = ret.ljust(
                 self.context.settings.code.line_width - len(l_end), l_fill)
             ret = ret + l_end
+        ret = ret.rstrip()
         return ret
 
     def _crate_doxy_comment(self, key: str, value: str, continued: bool = False) -> str:

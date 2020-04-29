@@ -75,7 +75,7 @@ class HardcodedSettings(SettingsBase):
         self.header.file_base_path = [[""]]
         self.header.filename_only = False
         self.header.template = [
-            '/**', '${FILE}', '${AUTHOR}', '${DATE}', '${BRIEF}', '**/']
+            '/**', '${FILE}', '${AUTHOR}', '${DATE}', '${BRIEF}', ' **/']
 
         self.footer = SimpleNamespace()
         self.footer.content = [

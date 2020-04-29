@@ -16,7 +16,7 @@ import FileFinder
 import Errors
 import FancyOutput
 import OutputManager
-
+import argparse
 
 def print_version() -> None:
     print('v' + version.version)
@@ -26,7 +26,19 @@ def main() -> None:
     print_version()
     FancyOutput.init()
 
-    if len(sys.argv) == 1:
+    parser = argparse.ArgumentParser(prog='cpro', description='c/c++ code management', add_help=True)
+    ex_group = parser.add_mutually_exclusive_group()
+    ex_group.add_argument('-i', '--init', action='store_true', help='initialize the project')
+    args = parser.parse_args()
+
+    if args.init:
+        filename = './.cpro.json'
+        if not os.path.isfile(filename):
+            f = open(filename, 'w')
+            f.write('{ }')
+            f.close()
+        context = Context.Context('.')
+    else:
         try:
             root_path = '.'
 
@@ -110,13 +122,6 @@ def main() -> None:
 
         except Errors.CproException as e:
             print(str(e))
-    elif len(sys.argv) == 2 and sys.argv[1] == 'init':
-        filename = './.cpro.json'
-        if not os.path.isfile(filename):
-            f = open(filename, 'w')
-            f.write('{ }')
-            f.close()
-        context = Context.Context('.')
 
 
 if __name__ == "__main__":
