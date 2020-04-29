@@ -31,7 +31,17 @@ class ReportItem:
         self.file_modified: bool = False
 
     def __str__(self) -> str:
-        ret: str = self.name.ljust(60)
+        max_name_width = 65
+        name: str = self.name
+        if(len(name) > max_name_width):
+            split_point = 10
+            name_b = name[0:split_point] + '...'
+            name_e = name[split_point:]
+            while(len(name_b+name_e) > max_name_width):
+                name_e = name_e[1:]
+            name = name_b+name_e
+        ret: str = name.ljust(max_name_width)
+        ret = ret + '  '
         for stage in self.stages.keys():
             if stage == CproStage.FILE_WRITE:
                 if self.file_modified:
@@ -71,4 +81,5 @@ class ProgressReporter():
         ret: str = ''
         for item in self.items.values():
             ret = ret + str(item) + '\n'
+
         return ret

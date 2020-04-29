@@ -67,7 +67,10 @@ class HeaderGuard(Operations.CommentOperation):
     def _is_file_a_header(self) -> bool:
         extension = pathlib.Path(
             self.file.absolute_path).suffix.replace('.', '')
-        return extension in self.context.settings.scope.extensions_header
+        ret: bool = False
+        if extension in self.context.settings.scope.extensions_header:
+            ret = True
+        return ret
 
     def _find_tokens(self, predicate_str: str) -> Tuple[List[int], List[str]]:
         ret: List[str] = []
