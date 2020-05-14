@@ -10,7 +10,6 @@ import Settings
 import os
 from typing import List
 import sys
-import version
 import ProgressReporter
 import FileFinder
 import Errors
@@ -18,12 +17,7 @@ import FancyOutput
 import OutputManager
 import argparse
 
-def print_version() -> None:
-    print('v' + version.version)
-
-
 def main() -> None:
-    print_version()
     FancyOutput.init()
 
     parser = argparse.ArgumentParser(prog='cpro', description='c/c++ code management', add_help=True)
